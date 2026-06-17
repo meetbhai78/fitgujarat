@@ -1,0 +1,24 @@
+{
+  "name": "gujarat-stepcount-app",
+  "version": "1.0.0",
+  "description": "Gujarat District Leaderboard - Step Count Competition App",
+  "scripts": {
+    "start": "cd backend && node server.js",
+    "dev": "cd backend && node --watch server.js",
+    "seed": "cd backend && node seed.js",
+    "setup": "cd backend && npm install"
+  },
+  "keywords": [
+    "gujarat",
+    "stepcount",
+    "leaderboard",
+    "fitness"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "@capacitor/android": "^8.4.0",
+    "@capacitor/cli": "^8.4.0",
+    "@capacitor/core": "^8.4.0",
+    "@capgo/capacitor-pedometer": "^8.0.34"
+  }
+}
