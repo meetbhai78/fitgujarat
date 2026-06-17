@@ -1432,13 +1432,13 @@ async function renderAdminTabContent() {
       <div class="card">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:12px;">
           <div class="section-title" style="margin-bottom:0;"><span class="title-icon">👥</span> ${t('users')}</div>
-          <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap; width:100%; max-width:500px; justify-content:flex-end;">
-            <select id="adminUserSortSelect" class="form-input" style="padding: 8px 12px; font-size: 12px; border-radius: 10px; background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); color: var(--text-primary); outline: none; width:auto; cursor:pointer;" onchange="filterAdminUsersList()">
-              <option value="newest">📅 Newest Registered</option>
-              <option value="name_asc">🔤 Name (A-Z)</option>
-              <option value="name_desc">🔤 Name (Z-A)</option>
-              <option value="district_asc">📍 District (A-Z)</option>
-            </select>
+          <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap; width:100%; justify-content:flex-end;">
+            <div class="sort-bar" id="adminUserSortBar">
+              <button class="sort-pill active" data-sort="newest" onclick="setUserSort(this)">📅 Newest</button>
+              <button class="sort-pill" data-sort="name_asc" onclick="setUserSort(this)">🔤 A→Z</button>
+              <button class="sort-pill" data-sort="name_desc" onclick="setUserSort(this)">🔤 Z→A</button>
+              <button class="sort-pill" data-sort="district_asc" onclick="setUserSort(this)">📍 District</button>
+            </div>
             <div style="position:relative; flex:1; min-width:180px;">
               <input type="text" id="adminUserSearchInput" class="form-input" placeholder="🔍 Search by name, phone, email, district..." style="padding: 10px 36px 10px 12px; font-size: 13px; border-radius: 10px; background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); color: var(--text-primary); outline: none; width:100%;" oninput="filterAdminUsersList()">
               <span id="searchClearBtn" style="position:absolute; right:12px; top:50%; transform:translateY(-50%); cursor:pointer; color:var(--text-muted); display:none; font-size:14px;" onclick="clearAdminSearch()">✕</span>
@@ -1727,16 +1727,16 @@ function sortAndRenderFraudFlags() {
   const container = document.getElementById('fraudFlagsList');
   if (!container) return;
 
-  const sortSelect = document.getElementById('adminFlagSortSelect');
-  const sortBy = sortSelect ? sortSelect.value : 'newest';
+  const sortBar = document.getElementById('adminFlagSortBar');
+  const sortBy = sortBar ? (sortBar.querySelector('.sort-pill.active')?.dataset.sort || 'newest') : 'newest';
 
   const sortHeaderHtml = `
     <div style="display:flex; justify-content:flex-end; margin-bottom:12px;">
-      <select id="adminFlagSortSelect" class="form-input" style="padding: 8px 12px; font-size: 12px; border-radius: 10px; background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); color: var(--text-primary); outline: none; width:auto; cursor:pointer;" onchange="sortAndRenderFraudFlags()">
-        <option value="newest" ${sortBy === 'newest' ? 'selected' : ''}>📅 Newest First</option>
-        <option value="steps_desc" ${sortBy === 'steps_desc' ? 'selected' : ''}>🏃 Steps (Highest)</option>
-        <option value="name_asc" ${sortBy === 'name_asc' ? 'selected' : ''}>🔤 User Name (A-Z)</option>
-      </select>
+      <div class="sort-bar" id="adminFlagSortBar">
+        <button class="sort-pill ${sortBy==='newest'?'active':''}" data-sort="newest" onclick="setFlagSort(this)">📅 Newest</button>
+        <button class="sort-pill ${sortBy==='steps_desc'?'active':''}" data-sort="steps_desc" onclick="setFlagSort(this)">🏃 Steps</button>
+        <button class="sort-pill ${sortBy==='name_asc'?'active':''}" data-sort="name_asc" onclick="setFlagSort(this)">🔤 A→Z</button>
+      </div>
     </div>
   `;
 
@@ -1822,10 +1822,28 @@ function clearAdminSearch() {
   }
 }
 
+function setUserSort(btn) {
+  document.querySelectorAll('#adminUserSortBar .sort-pill').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  filterAdminUsersList();
+}
+
+function setWinnerSort(btn) {
+  document.querySelectorAll('#adminWinnerSortBar .sort-pill').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  sortAndRenderAdminWinners();
+}
+
+function setFlagSort(btn) {
+  document.querySelectorAll('#adminFlagSortBar .sort-pill').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  sortAndRenderFraudFlags();
+}
+
 function filterAdminUsersList() {
   const input = document.getElementById('adminUserSearchInput');
   const clearBtn = document.getElementById('searchClearBtn');
-  const sortSelect = document.getElementById('adminUserSortSelect');
+  const sortBar = document.getElementById('adminUserSortBar');
   if (!input) return;
   const query = input.value.trim().toLowerCase();
   if (clearBtn) clearBtn.style.display = query ? 'block' : 'none';
@@ -1843,8 +1861,8 @@ function filterAdminUsersList() {
     });
   }
 
-  // Apply sorting
-  const sortBy = sortSelect ? sortSelect.value : 'newest';
+  // Apply sorting from active pill
+  const sortBy = sortBar ? (sortBar.querySelector('.sort-pill.active')?.dataset.sort || 'newest') : 'newest';
   const sorted = [...filtered];
   if (sortBy === 'name_asc') {
     sorted.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
@@ -1852,7 +1870,8 @@ function filterAdminUsersList() {
     sorted.sort((a, b) => (b.name || '').localeCompare(a.name || ''));
   } else if (sortBy === 'district_asc') {
     sorted.sort((a, b) => (getDistrictName(a.district) || '').localeCompare(getDistrictName(b.district) || ''));
-  } else if (sortBy === 'newest') {
+  } else {
+    // newest (default)
     sorted.sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
   }
 
@@ -2384,10 +2403,10 @@ function sortAndRenderAdminWinners() {
   const container = document.getElementById('adminWinnersList');
   if (!container) return;
 
-  const sortSelect = document.getElementById('adminWinnerSortSelect');
-  const sortBy = sortSelect ? sortSelect.value : 'newest';
+  const sortSelect = document.getElementById('adminWinnerSortBar');
+  const sortBy = sortSelect ? (sortSelect.querySelector('.sort-pill.active')?.dataset.sort || 'newest') : 'newest';
 
-  // Sub-tab filter buttons
+  // Sub-tab filter buttons + sort bar
   const filterHtml = `
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:12px;">
       <div style="display:flex; gap:8px; flex-wrap:wrap;">
@@ -2395,11 +2414,11 @@ function sortAndRenderAdminWinners() {
           `<button onclick="loadAdminWinners('${val}')" style="padding:6px 14px; border-radius:20px; border:1px solid ${clr}; background:${adminWinnersFilter===val ? clr : 'transparent'}; color:${adminWinnersFilter===val ? 'white' : clr}; font-size:12px; font-weight:700; cursor:pointer; transition:all 0.2s;">${label}</button>`
         ).join('')}
       </div>
-      <select id="adminWinnerSortSelect" class="form-input" style="padding: 8px 12px; font-size: 12px; border-radius: 10px; background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); color: var(--text-primary); outline: none; width:auto; cursor:pointer;" onchange="sortAndRenderAdminWinners()">
-        <option value="newest" ${sortBy === 'newest' ? 'selected' : ''}>📅 Newest First</option>
-        <option value="score_desc" ${sortBy === 'score_desc' ? 'selected' : ''}>🏅 Score (Highest)</option>
-        <option value="name_asc" ${sortBy === 'name_asc' ? 'selected' : ''}>🔤 Name (A-Z)</option>
-      </select>
+      <div class="sort-bar" id="adminWinnerSortBar">
+        <button class="sort-pill ${sortBy==='newest'?'active':''}" data-sort="newest" onclick="setWinnerSort(this)">📅 Newest</button>
+        <button class="sort-pill ${sortBy==='score_desc'?'active':''}" data-sort="score_desc" onclick="setWinnerSort(this)">🏅 Score</button>
+        <button class="sort-pill ${sortBy==='name_asc'?'active':''}" data-sort="name_asc" onclick="setWinnerSort(this)">🔤 A→Z</button>
+      </div>
     </div>
   `;
 

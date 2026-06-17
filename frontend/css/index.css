@@ -369,6 +369,44 @@ input, select, textarea {
   box-shadow: 0 2px 8px var(--primary-glow);
 }
 
+/* ---- Sort Bar Pill Buttons ---- */
+.sort-bar {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.sort-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 12px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border-color);
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+  letter-spacing: 0.3px;
+}
+
+.sort-pill:hover {
+  border-color: var(--primary);
+  color: var(--primary-light);
+  background: rgba(255, 107, 53, 0.08);
+}
+
+.sort-pill.active {
+  background: var(--gradient-primary);
+  border-color: transparent;
+  color: #fff;
+  box-shadow: 0 2px 12px var(--primary-glow);
+}
+
 /* ---- Glassmorphism Card System ---- */
 .card {
   background: var(--bg-card);
