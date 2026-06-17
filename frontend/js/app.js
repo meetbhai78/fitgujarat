@@ -6,6 +6,7 @@ let currentPage = 'splash';
 let aiChatHistory = [];
 let leaderboardSubView = 'standings';
 let adminSubView = 'dashboard';
+let allAdminUsers = [];
 
 // ---- Router ----
 function navigate(page) {
@@ -1427,7 +1428,13 @@ async function renderAdminTabContent() {
   } else if (adminSubView === 'users') {
     container.innerHTML = `
       <div class="card">
-        <div class="section-title"><span class="title-icon">👥</span> ${t('users')}</div>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:12px;">
+          <div class="section-title" style="margin-bottom:0;"><span class="title-icon">👥</span> ${t('users')}</div>
+          <div style="position:relative; width:100%; max-width:300px;">
+            <input type="text" id="adminUserSearchInput" class="form-input" placeholder="🔍 Search by name, phone, email, district..." style="padding: 10px 36px 10px 12px; font-size: 13px; border-radius: 10px; background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); color: var(--text-primary); outline: none; width:100%;" oninput="filterAdminUsersList()">
+            <span id="searchClearBtn" style="position:absolute; right:12px; top:50%; transform:translateY(-50%); cursor:pointer; color:var(--text-muted); display:none; font-size:14px;" onclick="clearAdminSearch()">✕</span>
+          </div>
+        </div>
         <div id="adminUsersList" class="loading-spinner"><div class="spinner"></div></div>
       </div>
     `;
@@ -1732,56 +1739,173 @@ async function handleFlagReview(flagId, action) {
 async function loadAdminUsers() {
   try {
     const data = await api.getAdminUsers();
-    const container = document.getElementById('adminUsersList');
-    if (container) container.classList.remove('loading-spinner');
+    allAdminUsers = data.users || [];
 
     if (document.getElementById('adminStatUsersCount')) {
-      document.getElementById('adminStatUsersCount').textContent = data.users ? data.users.length : 0;
+      document.getElementById('adminStatUsersCount').textContent = allAdminUsers.length;
     }
 
-    if (!data.users || data.users.length === 0) {
-      container.innerHTML = `<div class="empty-state"><div class="empty-icon">👥</div><div class="empty-text">${t('noData')}</div></div>`;
-      return;
+    const input = document.getElementById('adminUserSearchInput');
+    if (input && input.value.trim()) {
+      filterAdminUsersList();
+    } else {
+      renderFilteredAdminUsers(allAdminUsers);
     }
+  } catch (error) {
+    console.error('Failed to load admin users:', error);
+    const container = document.getElementById('adminUsersList');
+    if (container) {
+      container.classList.remove('loading-spinner');
+      container.innerHTML = `<p class="text-muted" style="text-align:center;">Failed to load users.</p>`;
+    }
+  }
+}
 
-    container.innerHTML = `
-      <div class="rank-list">
-        ${data.users.map(u => `
-          <div class="rank-item" style="margin-bottom:8px; display:flex; flex-direction:column; gap:8px; padding:12px;">
-            <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
-              <div style="flex:1; min-width:180px; cursor:pointer;" onclick="toggleUserHistoryDetail('${u._id}')">
-                <div class="rank-name" style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
-                  ${u.name} <span style="font-size:10px; opacity:0.6; background:var(--bg-glass-light); padding:2px 6px; border-radius:4px; font-weight:normal;">🔍 View History</span>
-                  ${u.frozen_until && new Date(u.frozen_until) > new Date()
-                    ? `<span class="badge" style="font-size:10px; padding:2px 6px; background:rgba(239, 68, 68, 0.15); border:1px solid var(--danger); color:var(--danger); border-radius:4px; font-weight:bold;">❄️ Frozen until ${new Date(u.frozen_until).toLocaleDateString()}</span>`
-                    : ''
-                  }
+function clearAdminSearch() {
+  const input = document.getElementById('adminUserSearchInput');
+  if (input) {
+    input.value = '';
+    const clearBtn = document.getElementById('searchClearBtn');
+    if (clearBtn) clearBtn.style.display = 'none';
+    renderFilteredAdminUsers(allAdminUsers);
+  }
+}
+
+function filterAdminUsersList() {
+  const input = document.getElementById('adminUserSearchInput');
+  const clearBtn = document.getElementById('searchClearBtn');
+  if (!input) return;
+  const query = input.value.trim().toLowerCase();
+  if (clearBtn) clearBtn.style.display = query ? 'block' : 'none';
+
+  if (!query) {
+    renderFilteredAdminUsers(allAdminUsers);
+    return;
+  }
+
+  const filtered = allAdminUsers.filter(u => {
+    const name = (u.name || '').toLowerCase();
+    const email = (u.email || '').toLowerCase();
+    const phone = (u.phone || '').toLowerCase();
+    const district = (u.district || '').toLowerCase();
+    const districtName = (getDistrictName(u.district) || '').toLowerCase();
+    const role = (u.role || '').toLowerCase();
+    return name.includes(query) || email.includes(query) || phone.includes(query) || district.includes(query) || districtName.includes(query) || role.includes(query);
+  });
+
+  renderFilteredAdminUsers(filtered);
+}
+
+function getInitials(name) {
+  if (!name) return 'U';
+  const parts = name.trim().split(/\s+/);
+  if (parts.length >= 2) {
+    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+  }
+  return parts[0].substring(0, 2).toUpperCase();
+}
+
+function renderFilteredAdminUsers(users) {
+  const container = document.getElementById('adminUsersList');
+  if (!container) return;
+  container.classList.remove('loading-spinner');
+
+  if (users.length === 0) {
+    container.innerHTML = `<div class="empty-state" style="padding: 24px; text-align: center;"><div class="empty-icon" style="font-size: 32px; margin-bottom: 8px;">🔍</div><div class="empty-text" style="font-size: 13px; color: var(--text-secondary);">No matching users found</div></div>`;
+    return;
+  }
+
+  container.innerHTML = `
+    <div style="display:flex; flex-direction:column; gap:12px;">
+      ${users.map(u => {
+        const initials = getInitials(u.name);
+        const isFrozen = u.frozen_until && new Date(u.frozen_until) > new Date();
+        
+        // Role Badge Styling
+        let roleBadgeStyle = 'background: rgba(255,255,255,0.06); border: 1px solid var(--border-color); color: var(--text-secondary);';
+        let roleLabel = '👤 User';
+        if (u.role === 'state_admin') {
+          roleBadgeStyle = 'background: rgba(255, 107, 53, 0.15); border: 1px solid var(--primary); color: var(--primary-light); font-weight: 700;';
+          roleLabel = '🛡️ State Admin';
+        } else if (u.role === 'district_admin') {
+          roleBadgeStyle = 'background: rgba(29, 171, 156, 0.15); border: 1px solid var(--secondary); color: var(--secondary-light); font-weight: 700;';
+          roleLabel = '🏘️ District Admin';
+        }
+
+        // District / address description
+        let districtText = '📍 State-Level (Gujarat)';
+        if (u.role === 'state_admin') {
+          districtText = `🛡️ Gujarat State (${getDistrictName(u.district) || 'Gandhinagar'})`;
+        } else if (u.district) {
+          districtText = `📍 ${getDistrictName(u.district)} District`;
+        } else {
+          districtText = `📍 General Gujarat`;
+        }
+
+        return `
+          <div class="card" style="margin-bottom:0; padding:16px; border: 1px solid var(--border-color); display:flex; flex-direction:column; gap:12px; transition: all 0.2s ease;">
+            <!-- Top section: Avatar + Info -->
+            <div style="display:flex; gap:12px; align-items:flex-start;">
+              <!-- Avatar -->
+              <div style="width:46px; height:46px; border-radius:50%; background: linear-gradient(135deg, var(--bg-elevated) 0%, rgba(255,255,255,0.03) 100%); border: 1.5px solid var(--border-light); display:flex; align-items:center; justify-content:center; font-weight:800; font-size:16px; color:var(--text-primary); flex-shrink:0; box-shadow: var(--shadow-sm);">
+                ${initials}
+              </div>
+              
+              <!-- Info details -->
+              <div style="flex:1; min-width:0;">
+                <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:6px;">
+                  <div style="font-weight:700; font-size:15px; color:var(--text-primary); cursor:pointer; display:flex; align-items:center; gap:8px;" onclick="toggleUserHistoryDetail('${u._id}')">
+                    ${u.name}
+                    <span style="font-size:11px; font-weight:normal; opacity:0.6; background:rgba(255,255,255,0.05); padding:1px 6px; border-radius:10px;">🔍 History</span>
+                  </div>
+                  <span class="badge" style="font-size:10px; padding:2px 8px; border-radius:20px; ${roleBadgeStyle}">${roleLabel}</span>
                 </div>
-                <div class="rank-district" style="font-size:12px; color:var(--text-secondary);">${getDistrictName(u.district) || 'State'} | ${u.email || u.phone || ''}</div>
-                <span class="badge" style="font-size:10px; padding:2px 6px; background:var(--bg-glass-light); border:1px solid var(--border-light); margin-top:4px; display:inline-block; border-radius:4px; color:var(--text-primary);">
-                  ${u.role}
-                </span>
-               <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
-                 <button class="btn btn-sm" style="background:var(--primary); color:white; font-weight:600; padding:6px 12px; border-radius:var(--radius-sm); font-size:12px;" onclick="promptEditUser('${u._id}', '${u.name.replace(/'/g, "\\'")}', '${(u.email||'').replace(/'/g, "\\'")}', '${(u.phone||'').replace(/'/g, "\\'")}', '${u.district}', '${u.role}')">
-                   ✏️ Edit
-                 </button>
-                 <button class="btn btn-sm" style="background:var(--bg-glass-light); border:1px solid var(--border-light); color:var(--text-primary); font-weight:600; padding:6px 12px; border-radius:var(--radius-sm); font-size:12px;" onclick="promptResetPassword('${u._id}', '${u.name.replace(/'/g, "\\'")}')">
-                   🔑 Password
-                 </button>
-                 ${u.frozen_until && new Date(u.frozen_until) > new Date()
-                   ? `<button class="btn btn-sm" style="background:var(--secondary); color:white; font-weight:600; padding:6px 12px; border-radius:var(--radius-sm); font-size:12px;" onclick="handleUnfreezeUser('${u._id}', '${u.name.replace(/'/g, "\\'")}')">
-                        🔥 Unfreeze
-                      </button>`
-                   : `<button class="btn btn-sm" style="background:var(--warning); color:white; font-weight:600; padding:6px 12px; border-radius:var(--radius-sm); font-size:12px;" onclick="promptFreezeUser('${u._id}', '${u.name.replace(/'/g, "\\'")}')">
-                        ❄️ Freeze
-                      </button>`
-                 }
-                 <button class="btn btn-sm" style="background:var(--danger); color:white; font-weight:600; padding:6px 12px; border-radius:var(--radius-sm); font-size:12px;" onclick="handleDeleteUser('${u._id}', '${u.name.replace(/'/g, "\\'")}')">
-                   🗑️ ${t('delete')}
-                 </button>
-               </div>
-             </div>
+                
+                <!-- District / Address -->
+                <div style="font-size:12px; color:var(--primary-light); font-weight:600; margin-top:4px;">
+                  ${districtText}
+                </div>
+
+                <!-- Contact Info Grid -->
+                <div style="display:flex; flex-direction:column; gap:2px; margin-top:8px; font-size:12px; color:var(--text-secondary);">
+                  <div style="display:flex; align-items:center; gap:6px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+                    <span>✉️</span> <span>${u.email || '<span style="color:var(--text-muted); font-style:italic;">No Email</span>'}</span>
+                  </div>
+                  <div style="display:flex; align-items:center; gap:6px;">
+                    <span>📞</span> <span>${u.phone || '<span style="color:var(--text-muted); font-style:italic;">No Phone</span>'}</span>
+                  </div>
+                </div>
+
+                ${isFrozen 
+                  ? `<div style="margin-top:8px; padding:4px 8px; background:rgba(239, 68, 68, 0.1); border:1px solid rgba(239, 68, 68, 0.2); border-radius:6px; color:var(--danger); font-size:11px; font-weight:600; display:inline-flex; align-items:center; gap:4px;">
+                      ❄️ Frozen until ${new Date(u.frozen_until).toLocaleDateString()}
+                     </div>` 
+                  : ''
+                }
+              </div>
+            </div>
             
+            <!-- Actions row -->
+            <div style="display:flex; gap:6px; flex-wrap:wrap; border-top: 1px solid rgba(255,255,255,0.04); padding-top:10px; justify-content:flex-end;">
+              <button class="btn btn-sm" style="background:rgba(255, 107, 53, 0.1); border: 1px solid rgba(255, 107, 53, 0.25); color:var(--primary-light); font-weight:600; padding:6px 12px; border-radius:8px; font-size:12px;" onclick="promptEditUser('${u._id}', '${(u.name || '').replace(/'/g, "\\'")}', '${(u.email||'').replace(/'/g, "\\'")}', '${(u.phone||'').replace(/'/g, "\\'")}', '${u.district || ''}', '${u.role}')">
+                ✏️ Edit
+              </button>
+              <button class="btn btn-sm" style="background:rgba(255, 255, 255, 0.03); border:1px solid var(--border-color); color:var(--text-primary); font-weight:600; padding:6px 12px; border-radius:8px; font-size:12px;" onclick="promptResetPassword('${u._id}', '${(u.name || '').replace(/'/g, "\\'")}')">
+                🔑 Password
+              </button>
+              ${isFrozen
+                ? `<button class="btn btn-sm" style="background:rgba(29, 171, 156, 0.1); border: 1px solid rgba(29, 171, 156, 0.25); color:var(--secondary-light); font-weight:600; padding:6px 12px; border-radius:8px; font-size:12px;" onclick="handleUnfreezeUser('${u._id}', '${(u.name || '').replace(/'/g, "\\'")}')">
+                    🔥 Unfreeze
+                   </button>`
+                : `<button class="btn btn-sm" style="background:rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.25); color:var(--warning); font-weight:600; padding:6px 12px; border-radius:8px; font-size:12px;" onclick="promptFreezeUser('${u._id}', '${(u.name || '').replace(/'/g, "\\'")}')">
+                    ❄️ Freeze
+                   </button>`
+              }
+              <button class="btn btn-sm" style="background:rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.25); color:var(--danger); font-weight:600; padding:6px 12px; border-radius:8px; font-size:12px;" onclick="handleDeleteUser('${u._id}', '${(u.name || '').replace(/'/g, "\\'")}')">
+                🗑️ ${t('delete')}
+              </button>
+            </div>
+
             <!-- Expandable History Panel -->
             <div id="userHistoryPanel-${u._id}" style="display:none; width:100%; padding:12px; background:var(--bg-elevated); border-radius:var(--radius-md); border:1px solid var(--border-color); margin-top:8px;">
               <div style="font-size:12px; font-weight:700; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border-color); padding-bottom:6px;">
@@ -1791,17 +1915,10 @@ async function loadAdminUsers() {
               <div id="userHistoryContent-${u._id}" class="loading-spinner"><div class="spinner"></div></div>
             </div>
           </div>
-        `).join('')}
-      </div>
-    `;
-  } catch (error) {
-    console.error('Failed to load admin users:', error);
-    const container = document.getElementById('adminUsersList');
-    if (container) {
-      container.classList.remove('loading-spinner');
-      container.innerHTML = `<p class="text-muted" style="text-align:center;">Failed to load users.</p>`;
-    }
-  }
+        `;
+      }).join('')}
+    </div>
+  `;
 }
 
 async function toggleUserHistoryDetail(userId) {
