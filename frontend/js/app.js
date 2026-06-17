@@ -1,4 +1,4 @@
-﻿// ========================================
+// ========================================
 // Gujarat Step Counter - Main App & Router
 // ========================================
 
@@ -83,7 +83,7 @@ function renderPage(page) {
 function renderSplash(container) {
   container.innerHTML = `
     <div class="splash-screen">
-      <div class="splash-logo">ðŸƒ</div>
+      <div class="splash-logo">🏃</div>
       <h1 class="splash-title">${t('appName')}</h1>
       <p class="splash-subtitle">${t('appTagline')}</p>
       <div class="splash-loader">
@@ -118,7 +118,7 @@ function renderLogin(container) {
     <div class="auth-container">
       <div class="auth-card">
         <div class="auth-logo">
-          <span class="logo-emoji">ðŸƒ</span>
+          <span class="logo-emoji">🏃</span>
           <h1 class="logo-title">${t('appName')}</h1>
           <p class="logo-subtitle">${t('appTagline')}</p>
         </div>
@@ -132,7 +132,7 @@ function renderLogin(container) {
             <label class="form-label">${t('password')}</label>
             <div class="password-wrapper">
               <input type="password" class="form-input" id="loginPassword" placeholder="${t('password')}" required>
-              <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('loginPassword', this)">ðŸ‘ï¸</button>
+              <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('loginPassword', this)">👁️</button>
             </div>
           </div>
           <button type="submit" class="btn btn-primary btn-full btn-lg" id="loginBtn">${t('login')}</button>
@@ -145,12 +145,12 @@ function renderLogin(container) {
 
       <div style="margin-top:24px; display:flex; justify-content:center; gap:16px; align-items:center;">
         <button class="theme-toggle-btn" onclick="toggleTheme()" style="background:var(--bg-glass-light); border:1px solid var(--border-light); border-radius:var(--radius-sm); padding:6px 12px; color:var(--text-primary); cursor:pointer; font-weight:600; font-size:12px; display:flex; align-items:center; gap:6px;">
-          <span>${currentTheme === 'light' ? 'ðŸŒ™' : 'â˜€ï¸'}</span> 
-          ${currentTheme === 'light' ? (currentLang === 'gu' ? 'àª¡àª¾àª°à«àª• àª®à«‹àª¡' : 'Dark Mode') : (currentLang === 'gu' ? 'àª²àª¾àª‡àªŸ àª®à«‹àª¡' : 'Light Mode')}
+          <span>${currentTheme === 'light' ? '🌙' : '☀️'}</span> 
+          ${currentTheme === 'light' ? (currentLang === 'gu' ? 'ડાર્ક મોડ' : 'Dark Mode') : (currentLang === 'gu' ? 'લાઇટ મોડ' : 'Light Mode')}
         </button>
         <div class="lang-toggle">
           <button class="lang-btn ${currentLang==='en'?'active':''}" onclick="setLanguage('en')">English</button>
-          <button class="lang-btn ${currentLang==='gu'?'active':''}" onclick="setLanguage('gu')">àª—à«àªœàª°àª¾àª¤à«€</button>
+          <button class="lang-btn ${currentLang==='gu'?'active':''}" onclick="setLanguage('gu')">ગુજરાતી</button>
         </div>
       </div>
     </div>
@@ -162,10 +162,10 @@ function togglePasswordVisibility(inputId, btn) {
   if (!input) return;
   if (input.type === 'password') {
     input.type = 'text';
-    btn.textContent = 'ðŸ™ˆ';
+    btn.textContent = '🙈';
   } else {
     input.type = 'password';
-    btn.textContent = 'ðŸ‘ï¸';
+    btn.textContent = '👁️';
   }
 }
 
@@ -210,7 +210,7 @@ function renderRegister(container) {
     <div class="auth-container">
       <div class="auth-card">
         <div class="auth-logo">
-          <span class="logo-emoji">ðŸƒ</span>
+          <span class="logo-emoji">🏃</span>
           <h1 class="logo-title">${t('register')}</h1>
           <p class="logo-subtitle">${t('appTagline')}</p>
         </div>
@@ -232,12 +232,12 @@ function renderRegister(container) {
             <label class="form-label">${t('password')}</label>
             <div class="password-wrapper">
               <input type="password" class="form-input" id="regPassword" placeholder="${t('password')}" required minlength="6">
-              <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('regPassword', this)">ðŸ‘ï¸</button>
+              <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('regPassword', this)">👁️</button>
             </div>
           </div>
           <div class="form-group">
             <label class="form-label">${t('state')}</label>
-            <div class="form-state-fixed">ðŸ‡®ðŸ‡³ ${t('stateFixed')}</div>
+            <div class="form-state-fixed">🇮🇳 ${t('stateFixed')}</div>
           </div>
           <div class="form-group">
             <label class="form-label">${t('district')}</label>
@@ -256,12 +256,12 @@ function renderRegister(container) {
 
       <div style="margin-top:24px; display:flex; justify-content:center; gap:16px; align-items:center;">
         <button class="theme-toggle-btn" onclick="toggleTheme()" style="background:var(--bg-glass-light); border:1px solid var(--border-light); border-radius:var(--radius-sm); padding:6px 12px; color:var(--text-primary); cursor:pointer; font-weight:600; font-size:12px; display:flex; align-items:center; gap:6px;">
-          <span>${currentTheme === 'light' ? 'ðŸŒ™' : 'â˜€ï¸'}</span> 
-          ${currentTheme === 'light' ? (currentLang === 'gu' ? 'àª¡àª¾àª°à«àª• àª®à«‹àª¡' : 'Dark Mode') : (currentLang === 'gu' ? 'àª²àª¾àª‡àªŸ àª®à«‹àª¡' : 'Light Mode')}
+          <span>${currentTheme === 'light' ? '🌙' : '☀️'}</span> 
+          ${currentTheme === 'light' ? (currentLang === 'gu' ? 'ડાર્ક મોડ' : 'Dark Mode') : (currentLang === 'gu' ? 'લાઇટ મોડ' : 'Light Mode')}
         </button>
         <div class="lang-toggle">
           <button class="lang-btn ${currentLang==='en'?'active':''}" onclick="setLanguage('en')">English</button>
-          <button class="lang-btn ${currentLang==='gu'?'active':''}" onclick="setLanguage('gu')">àª—à«àªœàª°àª¾àª¤à«€</button>
+          <button class="lang-btn ${currentLang==='gu'?'active':''}" onclick="setLanguage('gu')">ગુજરાતી</button>
         </div>
       </div>
     </div>
@@ -323,7 +323,7 @@ async function renderDashboard(container) {
         text-align: center; box-shadow: 0 8px 24px rgba(239, 68, 68, 0.2);
       ">
         <div style="font-size: 15px; font-weight: 800; margin-bottom: 6px; display: flex; align-items: center; justify-content: center; gap: 8px;">
-          â„ï¸ Account Suspended (àªàª•àª¾àª‰àª¨à«àªŸ àª¸àª¸à«àªªà«‡àª¨à«àª¡)
+          ❄️ Account Suspended (એકાઉન્ટ સસ્પેન્ડ)
         </div>
         <p style="font-size: 12px; opacity: 0.9; margin: 0 0 12px; line-height: 1.4;">
           Your account has been frozen for suspicious activity. Step synchronization is temporarily locked.
@@ -342,7 +342,7 @@ async function renderDashboard(container) {
   const stepCounterHtml = isFrozen
     ? `
       <div class="step-counter card-glass" id="stepDisplay" style="padding: 30px; text-align: center; filter: grayscale(0.5); opacity: 0.85;">
-        <div style="font-size: 40px; margin-bottom: 10px;">ðŸ”’</div>
+        <div style="font-size: 40px; margin-bottom: 10px;">🔒</div>
         <div style="font-size: 14px; font-weight: 700; color: var(--danger);">Steps Sync Locked</div>
         <p style="font-size: 11px; color: var(--text-secondary); margin-top: 6px;">Please wait until suspension ends to sync steps.</p>
       </div>
@@ -351,7 +351,7 @@ async function renderDashboard(container) {
       <div class="step-counter card-glass" id="stepDisplay">
         ${generateStepRing(0)}
         <button class="sync-btn" onclick="handleSyncSteps()">
-          <span>ðŸ”„</span> ${t('syncSteps')}
+          <span>🔄</span> ${t('syncSteps')}
         </button>
       </div>
     `;
@@ -359,7 +359,7 @@ async function renderDashboard(container) {
   container.innerHTML = `
     <div class="page-content">
       <div class="page-header">
-        <p class="page-subtitle">${getGreeting()}, ${user.name?.split(' ')[0] || ''} ðŸ‘‹</p>
+        <p class="page-subtitle">${getGreeting()}, ${user.name?.split(' ')[0] || ''} 👋</p>
         <h1 class="page-title">${t('todaySteps')}</h1>
       </div>
 
@@ -368,29 +368,29 @@ async function renderDashboard(container) {
 
       <div class="stat-grid">
         <div class="stat-card primary">
-          <div class="stat-icon"><span class="flame-animation">ðŸ”¥</span></div>
+          <div class="stat-icon"><span class="flame-animation">🔥</span></div>
           <div class="stat-value" id="streakValue">${streak?.current_streak || 0}</div>
           <div class="stat-label">${t('currentStreak')}</div>
         </div>
         <div class="stat-card accent">
-          <div class="stat-icon">ðŸ“Š</div>
+          <div class="stat-icon">📊</div>
           <div class="stat-value" id="scoreValue">-</div>
           <div class="stat-label">${t('totalScore')}</div>
         </div>
         <div class="stat-card secondary">
-          <div class="stat-icon">ðŸ…</div>
+          <div class="stat-icon">🏅</div>
           <div class="stat-value" id="districtRankValue">-</div>
           <div class="stat-label">${t('districtRank')}</div>
         </div>
         <div class="stat-card" style="--stat-color: var(--info);">
-          <div class="stat-icon">ðŸŒŸ</div>
+          <div class="stat-icon">🌟</div>
           <div class="stat-value" id="stateRankValue">-</div>
           <div class="stat-label">${t('stateRank')}</div>
         </div>
       </div>
 
       <div class="card" id="recPreview">
-        <div class="section-title"><span class="title-icon">ðŸ¤–</span> ${t('recommendations')}</div>
+        <div class="section-title"><span class="title-icon">🤖</span> ${t('recommendations')}</div>
         <div id="dashRecList" class="loading-spinner"><div class="spinner"></div></div>
       </div>
 
@@ -422,7 +422,7 @@ function startSuspensionCountdown() {
     const diff = untilDate - now;
 
     if (diff <= 0) {
-      showToast('ðŸŽ‰ Your account suspension has expired! You can now log steps.', 'success');
+      showToast('🎉 Your account suspension has expired! You can now log steps.', 'success');
       api.getMe().then(updatedUser => {
         saveUser(updatedUser.user);
         renderDashboard(document.getElementById('pageContainer'));
@@ -441,7 +441,7 @@ function startSuspensionCountdown() {
     if (days > 0) displayStr += `${days}d `;
     displayStr += `${hours}h ${minutes}m ${seconds}s`;
 
-    el.textContent = `â³ Unlocks in: ${displayStr}`;
+    el.textContent = `⏳ Unlocks in: ${displayStr}`;
     
     if (document.getElementById('suspensionCountdown') === el) {
       setTimeout(update, 1000);
@@ -464,7 +464,7 @@ async function loadDashboardData(user) {
           ${t('score')}: <strong style="color:var(--accent);">${todayData.activity.calculated_score}</strong>
         </p>
         <button class="sync-btn" onclick="handleSyncSteps()" style="margin-top:16px;">
-          <span>ðŸ”„</span> ${t('syncSteps')}
+          <span>🔄</span> ${t('syncSteps')}
         </button>
       `;
     }
@@ -513,7 +513,7 @@ async function handleSyncSteps() {
   const syncBtn = document.querySelector('.sync-btn');
   if (syncBtn) {
     syncBtn.disabled = true;
-    syncBtn.innerHTML = `<span>â³</span> ${t('readingSensor')}`;
+    syncBtn.innerHTML = `<span>⏳</span> ${t('readingSensor')}`;
   }
 
   try {
@@ -547,7 +547,7 @@ async function handleSyncSteps() {
   } finally {
     if (syncBtn) {
       syncBtn.disabled = false;
-      syncBtn.innerHTML = `<span>ðŸ”„</span> ${t('syncSteps')}`;
+      syncBtn.innerHTML = `<span>🔄</span> ${t('syncSteps')}`;
     }
   }
 }
@@ -579,7 +579,7 @@ async function submitStepCount(steps, source) {
     showToast(`${steps.toLocaleString()} ${t('steps')} ${t('logged')}! ${t('score')}: ${result.scoring?.totalScore || 0}`);
 
     if (result.newBadge) {
-      showToast(`ðŸŽ‰ New badge: ${result.newBadge.name}!`, 'info');
+      showToast(`🎉 New badge: ${result.newBadge.name}!`, 'info');
     }
 
     if (result.streak) setStreak(result.streak);
@@ -607,24 +607,24 @@ async function renderActivity(container) {
       </div>
 
       <div class="card">
-        <div class="section-title"><span class="title-icon">ðŸ”„</span> ${t('syncSteps')}</div>
+        <div class="section-title"><span class="title-icon">🔄</span> ${t('syncSteps')}</div>
         <div style="text-align:center; padding:16px 0;">
           <p style="color:var(--text-secondary); margin-bottom:16px; font-size:14px;">
             ${isSensorAvailable() ? 'Auto-syncing steps from your phone\'s pedometer sensor.' : 'Pedometer sensor not available. (Web/Demo mode will simulate automatic sync)'}
           </p>
           <button class="btn btn-primary sync-btn" onclick="handleSyncSteps()" style="margin: 0 auto; display: flex; align-items: center; gap: 8px;">
-            <span>ðŸ”„</span> ${t('syncSteps')}
+            <span>🔄</span> ${t('syncSteps')}
           </button>
         </div>
       </div>
 
       <div class="card">
-        <div class="section-title"><span class="title-icon">ðŸ“…</span> ${t('streakCalendar')}</div>
+        <div class="section-title"><span class="title-icon">📅</span> ${t('streakCalendar')}</div>
         <div id="heatmapContainer" class="loading-spinner"><div class="spinner"></div></div>
       </div>
 
       <div class="card">
-        <div class="section-title"><span class="title-icon">ðŸ“Š</span> ${t('activityHistory')}</div>
+        <div class="section-title"><span class="title-icon">📊</span> ${t('activityHistory')}</div>
         <div class="stat-grid" id="activityStats" style="margin-bottom:16px;"></div>
         <div id="activityList" class="loading-spinner"><div class="spinner"></div></div>
       </div>
@@ -669,14 +669,14 @@ async function loadActivityData() {
     const activities = data.activities || [];
     if (activities.length === 0) {
       activityList.innerHTML = `
-        <div class="empty-state"><div class="empty-icon">ðŸ“­</div><div class="empty-text">${t('noActivityYet')}</div></div>
+        <div class="empty-state"><div class="empty-icon">📭</div><div class="empty-text">${t('noActivityYet')}</div></div>
       `;
     } else {
       activityList.innerHTML = activities.slice(0, 20).map(a => `
         <div class="rank-item" style="margin-bottom:8px;">
           <div style="flex:1;">
             <div class="rank-name">${formatDate(a.date)}</div>
-            <div class="rank-district">${a.raw_value.toLocaleString()} ${t('steps')} ${a.is_flagged ? 'âš ï¸' : ''}</div>
+            <div class="rank-district">${a.raw_value.toLocaleString()} ${t('steps')} ${a.is_flagged ? '⚠️' : ''}</div>
           </div>
           <div class="rank-value">${a.calculated_score}</div>
         </div>
@@ -705,10 +705,10 @@ async function renderLeaderboard(container) {
       <!-- Segmented View Toggle -->
       <div class="segmented-control">
         <button class="segment-btn ${leaderboardSubView === 'standings' ? 'active' : ''}" onclick="switchLeaderboardSubView('standings')">
-          ðŸ“Š ${currentLang === 'gu' ? 'àª¸à«àªŸà«‡àª¨à«àª¡àª¿àª‚àª—à«àª¸' : 'Live Standings'}
+          📊 ${currentLang === 'gu' ? 'સ્ટેન્ડિંગ્સ' : 'Live Standings'}
         </button>
         <button class="segment-btn ${leaderboardSubView === 'winners' ? 'active' : ''}" onclick="switchLeaderboardSubView('winners')">
-          ðŸŒŸ ${t('winners')}
+          🌟 ${t('winners')}
         </button>
       </div>
 
@@ -740,8 +740,8 @@ async function renderLeaderboardSubView() {
       </div>
 
       <div class="level-toggle">
-        <button class="level-btn ${lbLevel==='district'?'active':''}" onclick="switchLBLevel('district')">ðŸ˜ï¸ ${t('districtLevel')}</button>
-        <button class="level-btn ${lbLevel==='state'?'active':''}" onclick="switchLBLevel('state')">ðŸŒŸ ${t('stateLevel')}</button>
+        <button class="level-btn ${lbLevel==='district'?'active':''}" onclick="switchLBLevel('district')">🏘️ ${t('districtLevel')}</button>
+        <button class="level-btn ${lbLevel==='state'?'active':''}" onclick="switchLBLevel('state')">🌟 ${t('stateLevel')}</button>
       </div>
 
       <div id="leaderboardContent" class="loading-spinner"><div class="spinner"></div></div>
@@ -750,20 +750,20 @@ async function renderLeaderboardSubView() {
   } else {
     shell.innerHTML = `
       <div style="background:linear-gradient(135deg,rgba(99,102,241,0.08),rgba(167,139,250,0.05)); border:1px solid rgba(99,102,241,0.15); border-radius:12px; padding:12px 16px; margin-bottom:12px; display:flex; align-items:center; gap:10px;">
-        <span style="font-size:20px;">ðŸ“…</span>
+        <span style="font-size:20px;">📅</span>
         <div>
-          <div style="font-size:13px; font-weight:700; color:var(--text-primary);">${currentLang === 'gu' ? 'àª¸à«àªŸà«àª°à«€àª• àª…àª àªµàª¾àª¡àª¿àª• & àª®àª¾àª¸àª¿àª•' : 'Weekly District + Monthly State Winners'}</div>
-          <div style="font-size:11px; color:var(--text-secondary);">District winners updated every week Â· State winner updated every month</div>
+          <div style="font-size:13px; font-weight:700; color:var(--text-primary);">${currentLang === 'gu' ? 'સ્ટ્રીક અઠવાડિક & માસિક' : 'Weekly District + Monthly State Winners'}</div>
+          <div style="font-size:11px; color:var(--text-secondary);">District winners updated every week · State winner updated every month</div>
         </div>
       </div>
 
-      <div class="section-title"><span class="title-icon">ðŸ“…</span> ${t('districtWinners')} â€” ${getDistrictName(user.district)} <span style="font-size:11px; color:var(--text-muted); font-weight:500;">(Weekly)</span></div>
+      <div class="section-title"><span class="title-icon">📅</span> ${t('districtWinners')} — ${getDistrictName(user.district)} <span style="font-size:11px; color:var(--text-muted); font-weight:500;">(Weekly)</span></div>
       <div id="districtWinnerCards" class="loading-spinner"><div class="spinner"></div></div>
 
-      <div class="section-title mt-lg"><span class="title-icon">ðŸŒŸ</span> ${t('stateWinners')} <span style="font-size:11px; color:var(--text-muted); font-weight:500;">(Monthly)</span></div>
+      <div class="section-title mt-lg"><span class="title-icon">🌟</span> ${t('stateWinners')} <span style="font-size:11px; color:var(--text-muted); font-weight:500;">(Monthly)</span></div>
       <div id="stateWinnerCards" class="loading-spinner"><div class="spinner"></div></div>
 
-      <div class="section-title mt-lg"><span class="title-icon">â³</span> ${t('pastWinnersHistory')}</div>
+      <div class="section-title mt-lg"><span class="title-icon">⏳</span> ${t('pastWinnersHistory')}</div>
       <div id="pastWinnersCards" class="loading-spinner"><div class="spinner"></div></div>
     `;
     loadWinners(user);
@@ -788,7 +788,7 @@ async function loadLeaderboard() {
     container.classList.remove('loading-spinner');
 
     if (rankings.length === 0) {
-      container.innerHTML = `<div class="empty-state"><div class="empty-icon">ðŸ†</div><div class="empty-text">${t('noData')}</div></div>`;
+      container.innerHTML = `<div class="empty-state"><div class="empty-icon">🏆</div><div class="empty-text">${t('noData')}</div></div>`;
       return;
     }
 
@@ -848,7 +848,7 @@ async function loadLeaderboard() {
     const container = document.getElementById('leaderboardContent');
     if (container) {
       container.classList.remove('loading-spinner');
-      container.innerHTML = `<div class="empty-state"><div class="empty-icon">ðŸ†</div><div class="empty-text">${t('noData')}</div></div>`;
+      container.innerHTML = `<div class="empty-state"><div class="empty-icon">🏆</div><div class="empty-text">${t('noData')}</div></div>`;
     }
   }
 }
@@ -865,10 +865,10 @@ async function renderWinners(container) {
         <p class="page-subtitle">${t('districtWinners')} & ${t('stateWinners')}</p>
       </div>
 
-      <div class="section-title"><span class="title-icon">ðŸ˜ï¸</span> ${t('districtWinners')} - ${getDistrictName(user.district)}</div>
+      <div class="section-title"><span class="title-icon">🏘️</span> ${t('districtWinners')} - ${getDistrictName(user.district)}</div>
       <div id="districtWinnerCards" class="loading-spinner"><div class="spinner"></div></div>
 
-      <div class="section-title mt-lg"><span class="title-icon">ðŸŒŸ</span> ${t('stateWinners')}</div>
+      <div class="section-title mt-lg"><span class="title-icon">🌟</span> ${t('stateWinners')}</div>
       <div id="stateWinnerCards" class="loading-spinner"><div class="spinner"></div></div>
     </div>
   `;
@@ -885,7 +885,7 @@ async function loadWinners(user) {
     if (distData.winners && distData.winners.length > 0) {
       distCards.innerHTML = distData.winners.map(w => renderWinnerCard(w)).join('');
     } else {
-      distCards.innerHTML = `<div class="empty-state"><div class="empty-icon">ðŸ†</div><div class="empty-text">${t('noData')}</div></div>`;
+      distCards.innerHTML = `<div class="empty-state"><div class="empty-icon">🏆</div><div class="empty-text">${t('noData')}</div></div>`;
     }
 
     // Monthly state winners
@@ -895,7 +895,7 @@ async function loadWinners(user) {
     if (stateData.winners && stateData.winners.length > 0) {
       stateCards.innerHTML = stateData.winners.map(w => renderWinnerCard(w)).join('');
     } else {
-      stateCards.innerHTML = `<div class="empty-state"><div class="empty-icon">ðŸŒŸ</div><div class="empty-text">${t('noData')}</div></div>`;
+      stateCards.innerHTML = `<div class="empty-state"><div class="empty-icon">🌟</div><div class="empty-text">${t('noData')}</div></div>`;
     }
 
     // Past winners history
@@ -905,7 +905,7 @@ async function loadWinners(user) {
     if (historyData.winners && historyData.winners.length > 0) {
       historyCards.innerHTML = historyData.winners.map(w => renderWinnerCard(w)).join('');
     } else {
-      historyCards.innerHTML = `<div class="empty-state"><div class="empty-icon">â³</div><div class="empty-text">${t('noPastWinners')}</div></div>`;
+      historyCards.innerHTML = `<div class="empty-state"><div class="empty-icon">⏳</div><div class="empty-text">${t('noPastWinners')}</div></div>`;
     }
   } catch (error) {
     console.error('Winners load error:', error);
@@ -938,15 +938,15 @@ function renderWinnerCard(winner) {
   if (freq === 'weekly' && cycleStart) {
     const weekEnd = new Date(cycleStart);
     weekEnd.setDate(cycleStart.getDate() + 6);
-    cycleLabel = `Week of ${cycleStart.toLocaleDateString('en-IN', { day:'numeric', month:'short' })}â€“${weekEnd.toLocaleDateString('en-IN', { day:'numeric', month:'short' })}`;
+    cycleLabel = `Week of ${cycleStart.toLocaleDateString('en-IN', { day:'numeric', month:'short' })}–${weekEnd.toLocaleDateString('en-IN', { day:'numeric', month:'short' })}`;
   } else if (cycleStart) {
     cycleLabel = cycleStart.toLocaleDateString(currentLang === 'gu' ? 'gu-IN' : 'en-IN', { month: 'long', year: 'numeric' });
   }
 
   // Frequency badge
   const freqBadge = freq === 'weekly'
-    ? `<span class="freq-badge weekly">ðŸ“… Weekly</span>`
-    : `<span class="freq-badge monthly">ðŸ—“ï¸ Monthly</span>`;
+    ? `<span class="freq-badge weekly">📅 Weekly</span>`
+    : `<span class="freq-badge monthly">🗓️ Monthly</span>`;
 
   // Media section
   let mediaSection = '';
@@ -972,7 +972,7 @@ function renderWinnerCard(winner) {
   // Upload media button (only the winner sees it, and only if no media yet)
   const uploadBtn = (isOwnPost && winner.mediaType === 'none' && winner.isLive)
     ? `<button class="winner-upload-btn" onclick="event.stopPropagation(); openWinnerMediaModal('${winner.postId}', '${userName}')">
-         ðŸ“¸ ${currentLang === 'gu' ? 'àª‰àªœàªµàª£à«€ àªªà«‹àª¸à«àªŸ àª•àª°à«‹' : 'Share your celebration'}
+         📸 ${currentLang === 'gu' ? 'ઉજવણી પોસ્ટ કરો' : 'Share your celebration'}
        </button>`
     : '';
 
@@ -984,7 +984,7 @@ function renderWinnerCard(winner) {
         <div class="winner-ig-meta">
           <div class="winner-ig-name">${userName}</div>
           <div class="winner-ig-sub">
-            <span class="winner-district-label">${winner.level === 'district' ? 'ðŸ˜ï¸ ' + distName : 'ðŸŒŸ Gujarat State'}</span>
+            <span class="winner-district-label">${winner.level === 'district' ? '🏘️ ' + distName : '🌟 Gujarat State'}</span>
             ${freqBadge}
           </div>
         </div>
@@ -1004,24 +1004,24 @@ function renderWinnerCard(winner) {
       <div class="winner-score-band">
         <div>
           <div style="font-size:11px; color:var(--text-secondary);">${cycleLabel}</div>
-          <div style="font-size:18px; font-weight:800; color:var(--primary); letter-spacing:-0.5px;">ðŸ… ${formatNumber(winner.value)} pts</div>
+          <div style="font-size:18px; font-weight:800; color:var(--primary); letter-spacing:-0.5px;">🏅 ${formatNumber(winner.value)} pts</div>
         </div>
-        <div class="verified-badge"><span class="check">âœ…</span> ${t('verifiedByAI')}</div>
+        <div class="verified-badge"><span class="check">✅</span> ${t('verifiedByAI')}</div>
       </div>
 
       <!-- Engagement bar (IG-style) -->
       <div class="winner-ig-footer">
         <div class="winner-ig-actions">
           <button class="ig-action-btn like-btn ${likedClass}" onclick="event.stopPropagation(); handleWinnerLike('${winner.postId}')">
-            <span class="like-icon">â¤ï¸</span>
+            <span class="like-icon">❤️</span>
             <span class="stat-num" id="like-count-${winner.postId}">${formatNumber(winner.likeCount || 0)}</span>
           </button>
           <button class="ig-action-btn" onclick="event.stopPropagation(); handleWinnerShare('${winner.postId}')">
-            <span>ðŸ”—</span>
+            <span>🔗</span>
             <span>${formatNumber(winner.shareCount || 0)}</span>
           </button>
           <div class="ig-action-btn views-count">
-            <span>ðŸ‘ï¸</span>
+            <span>👁️</span>
             <span>${formatNumber(winner.viewCount || 0)}</span>
           </div>
         </div>
@@ -1108,17 +1108,17 @@ function openWinnerMediaModal(postId, userName) {
   modal.innerHTML = `
     <div style="background:var(--bg-card); border-radius:20px 20px 0 0; padding:24px 20px 32px; width:100%; max-width:600px; animation:slideUp 0.3s ease;">
       <div style="width:40px; height:4px; background:var(--border-color); border-radius:2px; margin:0 auto 20px;"></div>
-      <div style="font-size:18px; font-weight:800; color:var(--text-primary); margin-bottom:6px;">ðŸ“¸ Share Your Celebration</div>
+      <div style="font-size:18px; font-weight:800; color:var(--text-primary); margin-bottom:6px;">📸 Share Your Celebration</div>
       <div style="font-size:13px; color:var(--text-secondary); margin-bottom:20px;">Congratulations, ${userName}! Share a photo or audio to celebrate your win. Admin will review and approve.</div>
 
       <!-- File picker -->
       <div id="winnerMediaPreview" style="display:none; margin-bottom:16px; border-radius:12px; overflow:hidden; border:1px solid var(--border-color);"></div>
 
       <label style="display:flex; align-items:center; gap:10px; border:2px dashed var(--border-color); border-radius:12px; padding:18px; cursor:pointer; transition:border-color 0.2s; margin-bottom:16px;" id="winnerMediaLabel">
-        <span style="font-size:28px;">ðŸ“</span>
+        <span style="font-size:28px;">📁</span>
         <div>
           <div style="font-size:13px; font-weight:700; color:var(--text-primary);">Choose image or audio</div>
-          <div style="font-size:11px; color:var(--text-muted);">JPEG, PNG, GIF, WebP, MP3, WAV, OGG Â· Max 20MB</div>
+          <div style="font-size:11px; color:var(--text-muted);">JPEG, PNG, GIF, WebP, MP3, WAV, OGG · Max 20MB</div>
         </div>
         <input type="file" id="winnerMediaFile" accept="image/*,audio/*" style="display:none;" onchange="previewWinnerMedia(event)">
       </label>
@@ -1134,7 +1134,7 @@ function openWinnerMediaModal(postId, userName) {
 
       <div style="display:flex; gap:10px;">
         <button onclick="submitWinnerMedia('${postId}')" id="winnerMediaSubmitBtn" class="btn btn-primary" style="flex:1; font-weight:700;">
-          ðŸš€ Submit for Approval
+          🚀 Submit for Approval
         </button>
         <button onclick="document.getElementById('winnerMediaModal').remove()" class="btn btn-outline" style="flex:0 0 auto; padding:12px 16px;">
           Cancel
@@ -1168,7 +1168,7 @@ function previewWinnerMedia(event) {
     const url = URL.createObjectURL(file);
     preview.innerHTML = `
       <div style="padding:16px; background:var(--bg-glass-light); display:flex; align-items:center; gap:12px;">
-        <span style="font-size:32px;">ðŸŽµ</span>
+        <span style="font-size:32px;">🎵</span>
         <div>
           <div style="font-size:13px; font-weight:700;">${file.name}</div>
           <audio controls style="width:200px; margin-top:6px;"><source src="${url}"></audio>
@@ -1192,7 +1192,7 @@ async function submitWinnerMedia(postId) {
 
   errorEl.style.display = 'none';
   submitBtn.disabled = true;
-  submitBtn.textContent = 'â³ Uploading...';
+  submitBtn.textContent = '⏳ Uploading...';
 
   try {
     const formData = new FormData();
@@ -1204,7 +1204,7 @@ async function submitWinnerMedia(postId) {
     await api.uploadWinnerMedia(postId, formData);
 
     document.getElementById('winnerMediaModal')?.remove();
-    showToast('ðŸŽ‰ Celebration post submitted! Awaiting admin approval.', 'success');
+    showToast('🎉 Celebration post submitted! Awaiting admin approval.', 'success');
 
     // Reload winners section
     const user = getUser();
@@ -1213,7 +1213,7 @@ async function submitWinnerMedia(postId) {
     errorEl.style.display = 'block';
     errorEl.textContent = error.message || 'Upload failed. Please try again.';
     submitBtn.disabled = false;
-    submitBtn.textContent = 'ðŸš€ Submit for Approval';
+    submitBtn.textContent = '🚀 Submit for Approval';
   }
 }
 
@@ -1224,10 +1224,10 @@ async function renderProfile(container) {
   if (!user) { navigate('login'); return; }
 
   const badges = [
-    { name: t('bronzeFlame'), icon: 'ðŸ”¥', days: 7, earned: (streak?.longest_streak || 0) >= 7 },
-    { name: t('silverFlame'), icon: 'ðŸ”¥ðŸ”¥', days: 30, earned: (streak?.longest_streak || 0) >= 30 },
-    { name: t('goldFlame'), icon: 'ðŸ”¥ðŸ”¥ðŸ”¥', days: 100, earned: (streak?.longest_streak || 0) >= 100 },
-    { name: t('diamondStreak'), icon: 'ðŸ’ŽðŸ”¥', days: 365, earned: (streak?.longest_streak || 0) >= 365 },
+    { name: t('bronzeFlame'), icon: '🔥', days: 7, earned: (streak?.longest_streak || 0) >= 7 },
+    { name: t('silverFlame'), icon: '🔥🔥', days: 30, earned: (streak?.longest_streak || 0) >= 30 },
+    { name: t('goldFlame'), icon: '🔥🔥🔥', days: 100, earned: (streak?.longest_streak || 0) >= 100 },
+    { name: t('diamondStreak'), icon: '💎🔥', days: 365, earned: (streak?.longest_streak || 0) >= 365 },
   ];
 
   container.innerHTML = `
@@ -1235,12 +1235,12 @@ async function renderProfile(container) {
       <div class="profile-header">
         <div class="profile-avatar">${getInitials(user.name)}</div>
         <h2 class="profile-name">${user.name}</h2>
-        <p class="profile-district">ðŸ“ ${getDistrictName(user.district)}</p>
-        <p class="profile-state">ðŸ‡®ðŸ‡³ ${t('stateFixed')}</p>
+        <p class="profile-district">📍 ${getDistrictName(user.district)}</p>
+        <p class="profile-state">🇮🇳 ${t('stateFixed')}</p>
       </div>
 
       <div class="card">
-        <div class="section-title"><span class="title-icon"><span class="flame-animation">ðŸ”¥</span></span> ${t('streakStats')}</div>
+        <div class="section-title"><span class="title-icon"><span class="flame-animation">🔥</span></span> ${t('streakStats')}</div>
         <div class="stat-grid" style="grid-template-columns: repeat(2, 1fr);">
           <div class="stat-card primary">
             <div class="stat-value">${streak?.current_streak || 0}</div>
@@ -1253,7 +1253,7 @@ async function renderProfile(container) {
         </div>
         <div style="display:flex; gap:12px; margin-top:12px;">
           <div class="card-glass" style="flex:1; text-align:center; padding:12px; margin:0;">
-            <div style="font-size:24px;">â„ï¸</div>
+            <div style="font-size:24px;">❄️</div>
             <div style="font-size:13px; color:var(--text-secondary); margin-top:4px;">
               ${streak?.freeze_used_this_month ? t('freezeUsed') : `${streak?.freeze_available || 1} ${t('freezeAvailable')}`}
             </div>
@@ -1262,7 +1262,7 @@ async function renderProfile(container) {
       </div>
 
       <div class="card">
-        <div class="section-title"><span class="title-icon">ðŸŽ–ï¸</span> ${t('badges')}</div>
+        <div class="section-title"><span class="title-icon">🎖️</span> ${t('badges')}</div>
         <div class="badge-grid">
           ${badges.map(b => `
             <div class="badge-item ${b.earned ? 'earned' : 'locked'}">
@@ -1275,24 +1275,24 @@ async function renderProfile(container) {
       </div>
 
       <div class="card">
-        <div class="section-title"><span class="title-icon">ðŸ¤–</span> ${t('recommendations')}</div>
+        <div class="section-title"><span class="title-icon">🤖</span> ${t('recommendations')}</div>
         <div id="profileRecs" class="loading-spinner"><div class="spinner"></div></div>
       </div>
 
       ${generateAIChatHTML()}
 
       <div class="card">
-        <div class="section-title"><span class="title-icon">âš™ï¸</span> ${t('settings')}</div>
+        <div class="section-title"><span class="title-icon">⚙️</span> ${t('settings')}</div>
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
           <span style="font-size:14px;">${t('language')}</span>
           <div class="lang-toggle">
             <button class="lang-btn ${currentLang==='en'?'active':''}" onclick="setLanguage('en')">English</button>
-            <button class="lang-btn ${currentLang==='gu'?'active':''}" onclick="setLanguage('gu')">àª—à«àªœàª°àª¾àª¤à«€</button>
+            <button class="lang-btn ${currentLang==='gu'?'active':''}" onclick="setLanguage('gu')">ગુજરાતી</button>
           </div>
         </div>
-        ${user.role !== 'user' ? `<button class="btn btn-secondary btn-full mb-md" onclick="navigate('admin')">ðŸ›¡ï¸ ${t('adminPanel')}</button>` : ''}
+        ${user.role !== 'user' ? `<button class="btn btn-secondary btn-full mb-md" onclick="navigate('admin')">🛡️ ${t('adminPanel')}</button>` : ''}
         <button class="btn btn-outline btn-full" style="border-color:var(--danger); color:var(--danger);" onclick="logoutUser()">
-          ðŸšª ${t('logout')}
+          🚪 ${t('logout')}
         </button>
       </div>
     </div>
@@ -1333,39 +1333,39 @@ async function renderAdmin(container) {
     <div class="page-content">
       <div class="page-header" style="display:flex; justify-content:space-between; align-items:center;">
         <div>
-          <h1 class="page-title">ðŸ›¡ï¸ ${t('adminPanel')}</h1>
+          <h1 class="page-title">🛡️ ${t('adminPanel')}</h1>
           <p class="page-subtitle">${t('stateLevel')}</p>
         </div>
         <button class="btn btn-sm" style="border:1px solid var(--danger); color:var(--danger); background:none; font-weight:600; padding:6px 12px; border-radius:var(--radius-sm); font-size:12px; cursor:pointer;" onclick="logoutUser()">
-          ðŸšª ${t('logout')}
+          🚪 ${t('logout')}
         </button>
       </div>
 
       <!-- Quick Metrics Grid -->
       <div class="admin-stats-summary" style="display:${adminSubView === 'dashboard' ? 'none' : 'grid'}; grid-template-columns: repeat(2, 1fr); gap:12px; margin-bottom:24px;">
         <div class="card" style="padding:14px; display:flex; align-items:center; gap:10px; margin-bottom:0;">
-          <div style="font-size:22px;">ðŸ‘¥</div>
+          <div style="font-size:22px;">👥</div>
           <div>
             <div style="font-size:11px; color:var(--text-secondary);">${t('users')}</div>
             <div id="adminStatUsersCount" style="font-size:20px; font-weight:700; color:var(--text-primary);">-</div>
           </div>
         </div>
         <div class="card" style="padding:14px; display:flex; align-items:center; gap:10px; margin-bottom:0;">
-          <div style="font-size:22px;">ðŸ†</div>
+          <div style="font-size:22px;">🏆</div>
           <div>
             <div style="font-size:11px; color:var(--text-secondary);">Total Posts</div>
             <div id="adminStatWinnersCount" style="font-size:20px; font-weight:700; color:var(--text-primary);">-</div>
           </div>
         </div>
         <div class="card" style="padding:14px; display:flex; align-items:center; gap:10px; margin-bottom:0;">
-          <div style="font-size:22px;">â³</div>
+          <div style="font-size:22px;">⏳</div>
           <div>
             <div style="font-size:11px; color:var(--warning);">Pending Approval</div>
             <div id="adminStatPendingCount" style="font-size:20px; font-weight:700; color:var(--warning);">-</div>
           </div>
         </div>
         <div class="card" style="padding:14px; display:flex; align-items:center; gap:10px; margin-bottom:0;">
-          <div style="font-size:22px;">âš ï¸</div>
+          <div style="font-size:22px;">⚠️</div>
           <div>
             <div style="font-size:11px; color:var(--danger);">Fraud Flags</div>
             <div id="adminStatFlagCount" style="font-size:20px; font-weight:700; color:var(--danger);">-</div>
@@ -1376,16 +1376,16 @@ async function renderAdmin(container) {
       <!-- Segmented View Toggle -->
       <div class="segmented-control" style="margin-bottom: 20px;">
         <button class="segment-btn ${adminSubView === 'dashboard' ? 'active' : ''}" onclick="switchAdminSubView('dashboard')">
-          ðŸ“Š Dashboard
+          📊 Dashboard
         </button>
         <button class="segment-btn ${adminSubView === 'users' ? 'active' : ''}" onclick="switchAdminSubView('users')">
-          ðŸ‘¥ ${t('users')}
+          👥 ${t('users')}
         </button>
         <button class="segment-btn ${adminSubView === 'winners' ? 'active' : ''}" onclick="switchAdminSubView('winners')">
-          ðŸ† Winners
+          🏆 Winners
         </button>
         <button class="segment-btn ${adminSubView === 'flags' ? 'active' : ''}" onclick="switchAdminSubView('flags')">
-          âš ï¸ Fraud
+          ⚠️ Fraud
         </button>
       </div>
 
@@ -1431,17 +1431,17 @@ async function renderAdminTabContent() {
     container.innerHTML = `
       <div class="card">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:12px;">
-          <div class="section-title" style="margin-bottom:0;"><span class="title-icon">ðŸ‘¥</span> ${t('users')}</div>
+          <div class="section-title" style="margin-bottom:0;"><span class="title-icon">👥</span> ${t('users')}</div>
           <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap; width:100%; max-width:500px; justify-content:flex-end;">
             <select id="adminUserSortSelect" class="form-input" style="padding: 8px 12px; font-size: 12px; border-radius: 10px; background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); color: var(--text-primary); outline: none; width:auto; cursor:pointer;" onchange="filterAdminUsersList()">
-              <option value="newest">ðŸ“… Newest Registered</option>
-              <option value="name_asc">ðŸ”¤ Name (A-Z)</option>
-              <option value="name_desc">ðŸ”¤ Name (Z-A)</option>
-              <option value="district_asc">ðŸ“ District (A-Z)</option>
+              <option value="newest">📅 Newest Registered</option>
+              <option value="name_asc">🔤 Name (A-Z)</option>
+              <option value="name_desc">🔤 Name (Z-A)</option>
+              <option value="district_asc">📍 District (A-Z)</option>
             </select>
             <div style="position:relative; flex:1; min-width:180px;">
-              <input type="text" id="adminUserSearchInput" class="form-input" placeholder="ðŸ” Search by name, phone, email, district..." style="padding: 10px 36px 10px 12px; font-size: 13px; border-radius: 10px; background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); color: var(--text-primary); outline: none; width:100%;" oninput="filterAdminUsersList()">
-              <span id="searchClearBtn" style="position:absolute; right:12px; top:50%; transform:translateY(-50%); cursor:pointer; color:var(--text-muted); display:none; font-size:14px;" onclick="clearAdminSearch()">âœ•</span>
+              <input type="text" id="adminUserSearchInput" class="form-input" placeholder="🔍 Search by name, phone, email, district..." style="padding: 10px 36px 10px 12px; font-size: 13px; border-radius: 10px; background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); color: var(--text-primary); outline: none; width:100%;" oninput="filterAdminUsersList()">
+              <span id="searchClearBtn" style="position:absolute; right:12px; top:50%; transform:translateY(-50%); cursor:pointer; color:var(--text-muted); display:none; font-size:14px;" onclick="clearAdminSearch()">✕</span>
             </div>
           </div>
         </div>
@@ -1452,7 +1452,7 @@ async function renderAdminTabContent() {
   } else if (adminSubView === 'winners') {
     container.innerHTML = `
       <div class="card">
-        <div class="section-title"><span class="title-icon">ðŸ†</span> Winner Posts â€” Approval Queue</div>
+        <div class="section-title"><span class="title-icon">🏆</span> Winner Posts — Approval Queue</div>
         <div id="adminWinnersList"></div>
       </div>
     `;
@@ -1460,7 +1460,7 @@ async function renderAdminTabContent() {
   } else if (adminSubView === 'flags') {
     container.innerHTML = `
       <div class="card">
-        <div class="section-title"><span class="title-icon">âš ï¸</span> Fraud Flags</div>
+        <div class="section-title"><span class="title-icon">⚠️</span> Fraud Flags</div>
         <div id="fraudFlagsList" class="loading-spinner"><div class="spinner"></div></div>
       </div>
     `;
@@ -1494,8 +1494,8 @@ async function renderAdminDashboard() {
         <div class="trend-bar-wrapper">
           <div class="trend-tooltip">
             <strong>${dateStr}</strong><br>
-            ðŸƒ ${formatNumber(trend.steps)} ${t('steps')}<br>
-            ðŸ‘¥ ${trend.activeUsers} Active Users
+            🏃 ${formatNumber(trend.steps)} ${t('steps')}<br>
+            👥 ${trend.activeUsers} Active Users
           </div>
           <div class="trend-bar-fill" style="height: ${Math.max(pct, 5)}%;"></div>
           <div class="trend-bar-label">${dayLabel}</div>
@@ -1506,7 +1506,7 @@ async function renderAdminDashboard() {
     // Districts list
     const districtRowsHtml = districts.length > 0
       ? districts.map((d, index) => {
-          const badge = index === 0 ? 'ðŸ¥‡' : index === 1 ? 'ðŸ¥ˆ' : index === 2 ? 'ðŸ¥‰' : 'ðŸƒ';
+          const badge = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : '🏃';
           return `
             <tr>
               <td><span class="district-badge">${badge}</span> ${getDistrictName(d.district)}</td>
@@ -1523,8 +1523,8 @@ async function renderAdminDashboard() {
           <div class="alert-item" style="border-left: 4px solid var(--danger); background: var(--bg-glass-light); padding: 12px; border-radius: var(--radius-sm); display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
             <div style="flex: 1;">
               <div style="font-weight: 800; font-size: 13px; color: var(--text-primary);">${f.user_id?.name || 'User'}</div>
-              <div style="font-size: 11px; color: var(--text-secondary); margin-top: 2px;">ðŸ“ ${getDistrictName(f.user_id?.district) || 'State'} Â· ${f.reason}</div>
-              <div style="font-size: 10px; color: var(--text-muted); margin-top: 4px;">ðŸ“… ${formatDate(f.activity_log_id?.date)} Â· ðŸƒ ${f.activity_log_id?.raw_value?.toLocaleString() || 0} steps</div>
+              <div style="font-size: 11px; color: var(--text-secondary); margin-top: 2px;">📍 ${getDistrictName(f.user_id?.district) || 'State'} · ${f.reason}</div>
+              <div style="font-size: 10px; color: var(--text-muted); margin-top: 4px;">📅 ${formatDate(f.activity_log_id?.date)} · 🏃 ${f.activity_log_id?.raw_value?.toLocaleString() || 0} steps</div>
             </div>
             <button class="btn btn-sm" style="padding: 4px 8px; font-size: 11px;" onclick="switchAdminSubView('flags')">
               Review
@@ -1533,7 +1533,7 @@ async function renderAdminDashboard() {
         `).join('')
       : `
           <div style="text-align: center; padding: 24px; color: var(--text-muted); background: var(--bg-glass-light); border-radius: var(--radius-md);">
-            <div style="font-size: 28px; margin-bottom: 6px;">ðŸ’š</div>
+            <div style="font-size: 28px; margin-bottom: 6px;">💚</div>
             <div style="font-size: 13px; font-weight: 600;">No pending fraud flags! All clear.</div>
           </div>
         `;
@@ -1542,54 +1542,54 @@ async function renderAdminDashboard() {
       <div class="dashboard-wrapper">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 8px;">
           <h2 style="font-size: 14px; font-weight: 800; color: var(--text-primary); margin: 0; display: flex; align-items: center; gap: 6px;">
-            ðŸ“Š Live System Overview <span style="background: rgba(29, 171, 156, 0.15); color: var(--secondary); font-size: 9px; padding: 2px 6px; border-radius: 12px; font-weight: 700; border: 1px solid rgba(29,171,156,0.3);">Real-Time</span>
+            📊 Live System Overview <span style="background: rgba(29, 171, 156, 0.15); color: var(--secondary); font-size: 9px; padding: 2px 6px; border-radius: 12px; font-weight: 700; border: 1px solid rgba(29,171,156,0.3);">Real-Time</span>
           </h2>
           <button class="btn btn-sm btn-outline" onclick="renderAdminDashboard()" style="padding: 6px 10px; font-size: 11px; font-weight: 700; display: flex; align-items: center; gap: 4px; border-color: var(--border-color); color: var(--text-primary);">
-            ðŸ”„ Refresh Dashboard
+            🔄 Refresh Dashboard
           </button>
         </div>
         <!-- Hero Metrics cards grid -->
         <div class="dashboard-grid-cards">
           <div class="db-stat-card">
-            <div class="db-stat-icon" style="color: var(--primary);">ðŸ‘¥</div>
+            <div class="db-stat-icon" style="color: var(--primary);">👥</div>
             <div class="db-stat-content">
-              <span class="db-stat-label">Total Users <span style="font-size:10px; opacity:0.6;">(àª•à«àª² àªµàªªàª°àª¾àª¶àª•àª°à«àª¤àª¾)</span></span>
+              <span class="db-stat-label">Total Users <span style="font-size:10px; opacity:0.6;">(કુલ વપરાશકર્તા)</span></span>
               <span class="db-stat-value">${summary.totalUsers?.toLocaleString() || 0}</span>
               <span class="db-stat-sub">+${summary.newUsersThisWeek || 0} this week</span>
             </div>
           </div>
           
           <div class="db-stat-card">
-            <div class="db-stat-icon" style="color: var(--secondary);">ðŸƒ</div>
+            <div class="db-stat-icon" style="color: var(--secondary);">🏃</div>
             <div class="db-stat-content">
-              <span class="db-stat-label">Total Steps <span style="font-size:10px; opacity:0.6;">(àª•à«àª² àªªàª—àª²àª¾àª‚)</span></span>
+              <span class="db-stat-label">Total Steps <span style="font-size:10px; opacity:0.6;">(કુલ પગલાં)</span></span>
               <span class="db-stat-value">${formatNumber(summary.totalStepsAllTime)}</span>
-              <span class="db-stat-sub">ðŸ”¥ ${formatNumber(summary.totalStepsToday)} today</span>
+              <span class="db-stat-sub">🔥 ${formatNumber(summary.totalStepsToday)} today</span>
             </div>
           </div>
 
           <div class="db-stat-card">
-            <div class="db-stat-icon" style="color: var(--accent);">ðŸŽ¯</div>
+            <div class="db-stat-icon" style="color: var(--accent);">🎯</div>
             <div class="db-stat-content">
-              <span class="db-stat-label">Active Users <span style="font-size:10px; opacity:0.6;">(àª¸àª•à«àª°àª¿àª¯)</span></span>
+              <span class="db-stat-label">Active Users <span style="font-size:10px; opacity:0.6;">(સક્રિય)</span></span>
               <span class="db-stat-value">${summary.activeToday?.toLocaleString() || 0}</span>
-              <span class="db-stat-sub">âš¡ Avg ${formatNumber(summary.avgStepsToday)} steps</span>
+              <span class="db-stat-sub">⚡ Avg ${formatNumber(summary.avgStepsToday)} steps</span>
             </div>
           </div>
 
           <div class="db-stat-card">
-            <div class="db-stat-icon" style="color: var(--danger);">âš ï¸</div>
+            <div class="db-stat-icon" style="color: var(--danger);">⚠️</div>
             <div class="db-stat-content">
-              <span class="db-stat-label">Alerts <span style="font-size:10px; opacity:0.6;">(àª¸àª¿àª¸à«àªŸàª® àªàª²àª°à«àªŸà«àª¸)</span></span>
+              <span class="db-stat-label">Alerts <span style="font-size:10px; opacity:0.6;">(સિસ્ટમ એલર્ટ્સ)</span></span>
               <span class="db-stat-value">${(summary.pendingFlags || 0) + (summary.pendingWinners || 0)}</span>
-              <span class="db-stat-sub">${summary.pendingFlags || 0} flags Â· ${summary.pendingWinners || 0} pending posts</span>
+              <span class="db-stat-sub">${summary.pendingFlags || 0} flags · ${summary.pendingWinners || 0} pending posts</span>
             </div>
           </div>
         </div>
 
         <!-- 7-Day Activity Sparkline -->
         <div class="card" style="margin-bottom: 20px; padding: 18px 20px;">
-          <div class="section-title" style="margin-bottom: 18px;"><span class="title-icon">ðŸ“ˆ</span> 7-Day Activity & Participation Trend</div>
+          <div class="section-title" style="margin-bottom: 18px;"><span class="title-icon">📈</span> 7-Day Activity & Participation Trend</div>
           <div class="sparkline-chart-container">
             <div class="sparkline-chart">
               ${sparklineHtml}
@@ -1601,7 +1601,7 @@ async function renderAdminDashboard() {
         <div class="dashboard-grid-split">
           <!-- Top Districts -->
           <div class="card" style="margin-bottom: 0; padding: 18px 20px;">
-            <div class="section-title" style="margin-bottom: 14px;"><span class="title-icon">ðŸ…</span> Top Active Districts <span style="font-size: 11px; font-weight: normal; color: var(--text-secondary); margin-left: 6px;">(àªœàª¿àª²à«àª²àª¾ àª•à«àª°àª®)</span></div>
+            <div class="section-title" style="margin-bottom: 14px;"><span class="title-icon">🏅</span> Top Active Districts <span style="font-size: 11px; font-weight: normal; color: var(--text-secondary); margin-left: 6px;">(જિલ્લા ક્રમ)</span></div>
             <div style="overflow-x: auto;">
               <table class="dashboard-table">
                 <thead>
@@ -1622,7 +1622,7 @@ async function renderAdminDashboard() {
           <div style="display: flex; flex-direction: column; gap: 20px;">
             <!-- Fraud Flags Alert Section -->
             <div class="card" style="margin-bottom: 0; padding: 18px 20px; flex: 1;">
-              <div class="section-title" style="margin-bottom: 14px;"><span class="title-icon">ðŸš¨</span> Recent Fraud Alerts</div>
+              <div class="section-title" style="margin-bottom: 14px;"><span class="title-icon">🚨</span> Recent Fraud Alerts</div>
               <div class="alerts-container">
                 ${flagsHtml}
               </div>
@@ -1630,7 +1630,7 @@ async function renderAdminDashboard() {
 
             <!-- Administrative Tools & Health -->
             <div class="card" style="margin-bottom: 0; padding: 18px 20px;">
-              <div class="section-title" style="margin-bottom: 14px;"><span class="title-icon">âš™ï¸</span> System Health & Operations</div>
+              <div class="section-title" style="margin-bottom: 14px;"><span class="title-icon">⚙️</span> System Health & Operations</div>
               <div style="display: flex; flex-direction: column; gap: 10px;">
                 <div style="display: flex; justify-content: space-between; align-items: center; background: var(--bg-glass-light); padding: 10px 12px; border-radius: 8px; border: 1px solid var(--border-color); font-size: 12px;">
                   <span style="color: var(--text-secondary); font-weight: 500;">Database Connection</span>
@@ -1667,10 +1667,10 @@ async function renderAdminDashboard() {
     console.error('Failed to load admin dashboard:', error);
     container.innerHTML = `
       <div style="text-align: center; padding: 40px var(--space-md); color: var(--danger);">
-        <div style="font-size: 32px; margin-bottom: 12px;">âš ï¸</div>
+        <div style="font-size: 32px; margin-bottom: 12px;">⚠️</div>
         <div style="font-weight: 700; font-size: 15px; margin-bottom: 6px;">Failed to load dashboard metrics</div>
         <div style="font-size: 12px; opacity: 0.8; margin-bottom: 20px;">${error.message || 'Server error'}</div>
-        <button class="btn btn-sm btn-outline" onclick="renderAdminDashboard()">ðŸ”„ Retry</button>
+        <button class="btn btn-sm btn-outline" onclick="renderAdminDashboard()">🔄 Retry</button>
       </div>
     `;
   }
@@ -1691,10 +1691,10 @@ async function triggerManualWinners(mode) {
   const confirmed = confirm(`Are you sure you want to manually trigger winner declaration calculation for the current ${mode} cycle? This will calculate leaders from the database and create winner post slots.`);
   if (!confirmed) return;
 
-  showToast('â³ Calculating winners...', 'info');
+  showToast('⏳ Calculating winners...', 'info');
   try {
     const result = await api.triggerAdminWinners(mode);
-    showToast(`ðŸŽ‰ ${result.message}`, 'success');
+    showToast(`🎉 ${result.message}`, 'success');
     renderAdminDashboard();
   } catch (error) {
     console.error(error);
@@ -1733,15 +1733,15 @@ function sortAndRenderFraudFlags() {
   const sortHeaderHtml = `
     <div style="display:flex; justify-content:flex-end; margin-bottom:12px;">
       <select id="adminFlagSortSelect" class="form-input" style="padding: 8px 12px; font-size: 12px; border-radius: 10px; background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); color: var(--text-primary); outline: none; width:auto; cursor:pointer;" onchange="sortAndRenderFraudFlags()">
-        <option value="newest" ${sortBy === 'newest' ? 'selected' : ''}>ðŸ“… Newest First</option>
-        <option value="steps_desc" ${sortBy === 'steps_desc' ? 'selected' : ''}>ðŸƒ Steps (Highest)</option>
-        <option value="name_asc" ${sortBy === 'name_asc' ? 'selected' : ''}>ðŸ”¤ User Name (A-Z)</option>
+        <option value="newest" ${sortBy === 'newest' ? 'selected' : ''}>📅 Newest First</option>
+        <option value="steps_desc" ${sortBy === 'steps_desc' ? 'selected' : ''}>🏃 Steps (Highest)</option>
+        <option value="name_asc" ${sortBy === 'name_asc' ? 'selected' : ''}>🔤 User Name (A-Z)</option>
       </select>
     </div>
   `;
 
   if (allFraudFlags.length === 0) {
-    container.innerHTML = `<div class="empty-state"><div class="empty-icon">âœ…</div><div class="empty-text">${t('noData')}</div></div>`;
+    container.innerHTML = `<div class="empty-state"><div class="empty-icon">✅</div><div class="empty-text">${t('noData')}</div></div>`;
     return;
   }
 
@@ -1767,9 +1767,9 @@ function sortAndRenderFraudFlags() {
             </div>
           </div>
           <div style="display:flex; gap:8px; align-items:center;">
-            <button class="btn btn-sm btn-success" onclick="handleFlagReview('${flag._id}', 'approved')">âœ… ${t('approve')}</button>
-            <button class="btn btn-sm" style="background:var(--danger); color:white;" onclick="handleFlagReview('${flag._id}', 'rejected')">âŒ ${t('reject')}</button>
-            <button class="btn btn-sm" style="background:var(--warning); color:white; font-weight:600;" onclick="promptFreezeUser('${flag.user_id?._id}', '${flag.user_id?.name?.replace(/'/g, "\\'")}')">â„ï¸ Freeze</button>
+            <button class="btn btn-sm btn-success" onclick="handleFlagReview('${flag._id}', 'approved')">✅ ${t('approve')}</button>
+            <button class="btn btn-sm" style="background:var(--danger); color:white;" onclick="handleFlagReview('${flag._id}', 'rejected')">❌ ${t('reject')}</button>
+            <button class="btn btn-sm" style="background:var(--warning); color:white; font-weight:600;" onclick="promptFreezeUser('${flag.user_id?._id}', '${flag.user_id?.name?.replace(/'/g, "\\'")}')">❄️ Freeze</button>
           </div>
         </div>
       `).join('')}
@@ -1874,7 +1874,7 @@ function renderFilteredAdminUsers(users) {
   container.classList.remove('loading-spinner');
 
   if (users.length === 0) {
-    container.innerHTML = `<div class="empty-state" style="padding: 24px; text-align: center;"><div class="empty-icon" style="font-size: 32px; margin-bottom: 8px;">ðŸ”</div><div class="empty-text" style="font-size: 13px; color: var(--text-secondary);">No matching users found</div></div>`;
+    container.innerHTML = `<div class="empty-state" style="padding: 24px; text-align: center;"><div class="empty-icon" style="font-size: 32px; margin-bottom: 8px;">🔍</div><div class="empty-text" style="font-size: 13px; color: var(--text-secondary);">No matching users found</div></div>`;
     return;
   }
 
@@ -1886,23 +1886,23 @@ function renderFilteredAdminUsers(users) {
         
         // Role Badge Styling
         let roleBadgeStyle = 'background: rgba(255,255,255,0.06); border: 1px solid var(--border-color); color: var(--text-secondary);';
-        let roleLabel = 'ðŸ‘¤ User';
+        let roleLabel = '👤 User';
         if (u.role === 'state_admin') {
           roleBadgeStyle = 'background: rgba(255, 107, 53, 0.15); border: 1px solid var(--primary); color: var(--primary-light); font-weight: 700;';
-          roleLabel = 'ðŸ›¡ï¸ State Admin';
+          roleLabel = '🛡️ State Admin';
         } else if (u.role === 'district_admin') {
           roleBadgeStyle = 'background: rgba(29, 171, 156, 0.15); border: 1px solid var(--secondary); color: var(--secondary-light); font-weight: 700;';
-          roleLabel = 'ðŸ˜ï¸ District Admin';
+          roleLabel = '🏘️ District Admin';
         }
 
         // District / address description
-        let districtText = 'ðŸ“ State-Level (Gujarat)';
+        let districtText = '📍 State-Level (Gujarat)';
         if (u.role === 'state_admin') {
-          districtText = `ðŸ›¡ï¸ Gujarat State (${getDistrictName(u.district) || 'Gandhinagar'})`;
+          districtText = `🛡️ Gujarat State (${getDistrictName(u.district) || 'Gandhinagar'})`;
         } else if (u.district) {
-          districtText = `ðŸ“ ${getDistrictName(u.district)} District`;
+          districtText = `📍 ${getDistrictName(u.district)} District`;
         } else {
-          districtText = `ðŸ“ General Gujarat`;
+          districtText = `📍 General Gujarat`;
         }
 
         return `
@@ -1919,7 +1919,7 @@ function renderFilteredAdminUsers(users) {
                 <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:6px;">
                   <div style="font-weight:700; font-size:15px; color:var(--text-primary); cursor:pointer; display:flex; align-items:center; gap:8px;" onclick="toggleUserHistoryDetail('${u._id}')">
                     ${u.name}
-                    <span style="font-size:11px; font-weight:normal; opacity:0.6; background:rgba(255,255,255,0.05); padding:1px 6px; border-radius:10px;">ðŸ” History</span>
+                    <span style="font-size:11px; font-weight:normal; opacity:0.6; background:rgba(255,255,255,0.05); padding:1px 6px; border-radius:10px;">🔍 History</span>
                   </div>
                   <span class="badge" style="font-size:10px; padding:2px 8px; border-radius:20px; ${roleBadgeStyle}">${roleLabel}</span>
                 </div>
@@ -1932,16 +1932,16 @@ function renderFilteredAdminUsers(users) {
                 <!-- Contact Info Grid -->
                 <div style="display:flex; flex-direction:column; gap:2px; margin-top:8px; font-size:12px; color:var(--text-secondary);">
                   <div style="display:flex; align-items:center; gap:6px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
-                    <span>âœ‰ï¸</span> <span>${u.email || '<span style="color:var(--text-muted); font-style:italic;">No Email</span>'}</span>
+                    <span>✉️</span> <span>${u.email || '<span style="color:var(--text-muted); font-style:italic;">No Email</span>'}</span>
                   </div>
                   <div style="display:flex; align-items:center; gap:6px;">
-                    <span>ðŸ“ž</span> <span>${u.phone || '<span style="color:var(--text-muted); font-style:italic;">No Phone</span>'}</span>
+                    <span>📞</span> <span>${u.phone || '<span style="color:var(--text-muted); font-style:italic;">No Phone</span>'}</span>
                   </div>
                 </div>
 
                 ${isFrozen 
                   ? `<div style="margin-top:8px; padding:4px 8px; background:rgba(239, 68, 68, 0.1); border:1px solid rgba(239, 68, 68, 0.2); border-radius:6px; color:var(--danger); font-size:11px; font-weight:600; display:inline-flex; align-items:center; gap:4px;">
-                      â„ï¸ Frozen until ${new Date(u.frozen_until).toLocaleDateString()}
+                      ❄️ Frozen until ${new Date(u.frozen_until).toLocaleDateString()}
                      </div>` 
                   : ''
                 }
@@ -1951,29 +1951,29 @@ function renderFilteredAdminUsers(users) {
             <!-- Actions row -->
             <div style="display:flex; gap:6px; flex-wrap:wrap; border-top: 1px solid rgba(255,255,255,0.04); padding-top:10px; justify-content:flex-end;">
               <button class="btn btn-sm" style="background:rgba(255, 107, 53, 0.1); border: 1px solid rgba(255, 107, 53, 0.25); color:var(--primary-light); font-weight:600; padding:6px 12px; border-radius:8px; font-size:12px;" onclick="promptEditUser('${u._id}', '${(u.name || '').replace(/'/g, "\\'")}', '${(u.email||'').replace(/'/g, "\\'")}', '${(u.phone||'').replace(/'/g, "\\'")}', '${u.district || ''}', '${u.role}')">
-                âœï¸ Edit
+                ✏️ Edit
               </button>
               <button class="btn btn-sm" style="background:rgba(255, 255, 255, 0.03); border:1px solid var(--border-color); color:var(--text-primary); font-weight:600; padding:6px 12px; border-radius:8px; font-size:12px;" onclick="promptResetPassword('${u._id}', '${(u.name || '').replace(/'/g, "\\'")}')">
-                ðŸ”‘ Password
+                🔑 Password
               </button>
               ${isFrozen
                 ? `<button class="btn btn-sm" style="background:rgba(29, 171, 156, 0.1); border: 1px solid rgba(29, 171, 156, 0.25); color:var(--secondary-light); font-weight:600; padding:6px 12px; border-radius:8px; font-size:12px;" onclick="handleUnfreezeUser('${u._id}', '${(u.name || '').replace(/'/g, "\\'")}')">
-                    ðŸ”¥ Unfreeze
+                    🔥 Unfreeze
                    </button>`
                 : `<button class="btn btn-sm" style="background:rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.25); color:var(--warning); font-weight:600; padding:6px 12px; border-radius:8px; font-size:12px;" onclick="promptFreezeUser('${u._id}', '${(u.name || '').replace(/'/g, "\\'")}')">
-                    â„ï¸ Freeze
+                    ❄️ Freeze
                    </button>`
               }
               <button class="btn btn-sm" style="background:rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.25); color:var(--danger); font-weight:600; padding:6px 12px; border-radius:8px; font-size:12px;" onclick="handleDeleteUser('${u._id}', '${(u.name || '').replace(/'/g, "\\'")}')">
-                ðŸ—‘ï¸ ${t('delete')}
+                🗑️ ${t('delete')}
               </button>
             </div>
 
             <!-- Expandable History Panel -->
             <div id="userHistoryPanel-${u._id}" style="display:none; width:100%; padding:12px; background:var(--bg-elevated); border-radius:var(--radius-md); border:1px solid var(--border-color); margin-top:8px;">
               <div style="font-size:12px; font-weight:700; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border-color); padding-bottom:6px;">
-                <span>ðŸ“ˆ Step Log & Fraud Flags History</span>
-                <span style="cursor:pointer; font-size:10px; opacity:0.7;" onclick="toggleUserHistoryDetail('${u._id}')">âŒ Close</span>
+                <span>📈 Step Log & Fraud Flags History</span>
+                <span style="cursor:pointer; font-size:10px; opacity:0.7;" onclick="toggleUserHistoryDetail('${u._id}')">❌ Close</span>
               </div>
               <div id="userHistoryContent-${u._id}" class="loading-spinner"><div class="spinner"></div></div>
             </div>
@@ -2011,10 +2011,10 @@ async function toggleUserHistoryDetail(userId) {
       const fraudLogs = activities.filter(a => a.is_flagged);
       const fraudInfoHtml = fraudLogs.length > 0
         ? `<div style="background:rgba(239, 68, 68, 0.1); border:1px solid rgba(239, 68, 68, 0.25); color:#EF4444; border-radius:6px; padding:8px 10px; font-size:11px; margin-bottom:10px; font-weight:600;">
-             âš ï¸ Detected ${fraudLogs.length} flagged fraud activities for this user! Inspect details below.
+             ⚠️ Detected ${fraudLogs.length} flagged fraud activities for this user! Inspect details below.
            </div>`
         : `<div style="background:rgba(16, 185, 129, 0.1); border:1px solid rgba(16, 185, 129, 0.25); color:#10B981; border-radius:6px; padding:8px 10px; font-size:11px; margin-bottom:10px; font-weight:600;">
-             âœ… No suspicious/fraud activity detected.
+             ✅ No suspicious/fraud activity detected.
            </div>`;
 
       const statsHtml = `
@@ -2039,15 +2039,15 @@ async function toggleUserHistoryDetail(userId) {
           ${activities.map(a => `
             <div style="background:var(--bg-glass-light); padding:8px; border-radius:6px; border:1px solid ${a.is_flagged ? 'rgba(239, 68, 68, 0.3)' : 'var(--border-color)'};">
               <div style="display:flex; justify-content:space-between; font-weight:700; margin-bottom:4px;">
-                <span>ðŸ“… ${formatDate(a.date)}</span>
+                <span>📅 ${formatDate(a.date)}</span>
                 <span style="color:${a.is_flagged ? '#EF4444' : 'var(--secondary)'};">${a.raw_value.toLocaleString()} steps</span>
               </div>
               <div style="color:var(--text-secondary); display:flex; justify-content:space-between;">
                 <span>Score: ${a.calculated_score}</span>
                 <span>Device: ${a.device_id || 'unknown'}</span>
               </div>
-              ${a.gps_lat ? `<div style="color:var(--text-muted); font-size:9px; margin-top:2px;">ðŸ“ GPS: ${a.gps_lat.toFixed(5)}, ${a.gps_lng.toFixed(5)}</div>` : ''}
-              ${a.is_flagged ? `<div style="color:#EF4444; font-weight:600; font-size:10px; margin-top:4px; border-top:1px dashed rgba(239,68,68,0.2); padding-top:4px;">âš ï¸ Flagged: ${a.flagged_reason || 'Suspicious Steps Limit Exceeded'}</div>` : ''}
+              ${a.gps_lat ? `<div style="color:var(--text-muted); font-size:9px; margin-top:2px;">📍 GPS: ${a.gps_lat.toFixed(5)}, ${a.gps_lng.toFixed(5)}</div>` : ''}
+              ${a.is_flagged ? `<div style="color:#EF4444; font-weight:600; font-size:10px; margin-top:4px; border-top:1px dashed rgba(239,68,68,0.2); padding-top:4px;">⚠️ Flagged: ${a.flagged_reason || 'Suspicious Steps Limit Exceeded'}</div>` : ''}
             </div>
           `).join('')}
         </div>
@@ -2071,9 +2071,9 @@ function promptEditUser(userId, userName, userEmail, userPhone, userDistrict, us
   ).join('');
 
   const roleOptions = [
-    ['user', 'ðŸ‘¤ Regular User'],
-    ['district_admin', 'ðŸ˜ï¸ District Admin'],
-    ['state_admin', 'ðŸ›¡ï¸ State Admin']
+    ['user', '👤 Regular User'],
+    ['district_admin', '🏘️ District Admin'],
+    ['state_admin', '🛡️ State Admin']
   ].map(([val, label]) =>
     `<option value="${val}" ${val === userRole ? 'selected' : ''}>${label}</option>`
   ).join('');
@@ -2083,7 +2083,7 @@ function promptEditUser(userId, userName, userEmail, userPhone, userDistrict, us
   modal.style.cssText = `position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.8);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:16px;`;
   modal.innerHTML = `
     <div class="card" style="background:var(--bg-card);border:1px solid var(--border-color);border-radius:var(--radius-lg);padding:24px;width:100%;max-width:460px;animation:scaleUp 0.2s ease;margin:0;box-shadow:var(--shadow-lg);max-height:90vh;overflow-y:auto;">
-      <h3 style="font-size:16px;font-weight:800;color:var(--text-primary);margin:0 0 4px;">âœï¸ Edit User: ${userName}</h3>
+      <h3 style="font-size:16px;font-weight:800;color:var(--text-primary);margin:0 0 4px;">✏️ Edit User: ${userName}</h3>
       <p style="font-size:12px;color:var(--text-secondary);margin:0 0 20px;">Update user details. Leave a field blank to keep it unchanged.</p>
 
       <div class="form-group">
@@ -2112,7 +2112,7 @@ function promptEditUser(userId, userName, userEmail, userPhone, userDistrict, us
       </div>
       <div id="editUserError" style="display:none;color:var(--danger);font-size:12px;margin-bottom:12px;font-weight:600;"></div>
       <div style="display:flex;gap:10px;">
-        <button onclick="submitEditUser('${userId}')" class="btn btn-primary" style="flex:1;font-weight:700;">ðŸ’¾ Save Changes</button>
+        <button onclick="submitEditUser('${userId}')" class="btn btn-primary" style="flex:1;font-weight:700;">💾 Save Changes</button>
         <button onclick="document.getElementById('adminEditUserModal').remove()" class="btn btn-outline" style="flex:0 0 auto;padding:10px 16px;">Cancel</button>
       </div>
     </div>
@@ -2153,18 +2153,18 @@ function promptResetPassword(userId, userName) {
   modal.style.cssText = `position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.8);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:16px;`;
   modal.innerHTML = `
     <div class="card" style="background:var(--bg-card);border:1px solid var(--border-color);border-radius:var(--radius-lg);padding:24px;width:100%;max-width:400px;animation:scaleUp 0.2s ease;margin:0;box-shadow:var(--shadow-lg);">
-      <h3 style="font-size:16px;font-weight:800;color:var(--text-primary);margin:0 0 4px;">ðŸ”‘ Reset Password: ${userName}</h3>
+      <h3 style="font-size:16px;font-weight:800;color:var(--text-primary);margin:0 0 4px;">🔑 Reset Password: ${userName}</h3>
       <p style="font-size:12px;color:var(--text-secondary);margin:0 0 20px;">Enter a new password for this user. Minimum 6 characters.</p>
       <div class="form-group">
         <label class="form-label">New Password</label>
         <div class="password-wrapper">
           <input type="password" class="form-input" id="resetPwdInput" placeholder="New password (min 6 chars)" minlength="6">
-          <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('resetPwdInput', this)">ðŸ‘ï¸</button>
+          <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('resetPwdInput', this)">👁️</button>
         </div>
       </div>
       <div id="resetPwdError" style="display:none;color:var(--danger);font-size:12px;margin-bottom:12px;font-weight:600;"></div>
       <div style="display:flex;gap:10px;">
-        <button onclick="submitResetPassword('${userId}')" class="btn btn-primary" style="flex:1;font-weight:700;background:var(--warning);border-color:var(--warning);">ðŸ”‘ Reset Password</button>
+        <button onclick="submitResetPassword('${userId}')" class="btn btn-primary" style="flex:1;font-weight:700;background:var(--warning);border-color:var(--warning);">🔑 Reset Password</button>
         <button onclick="document.getElementById('adminResetPwdModal').remove()" class="btn btn-outline" style="flex:0 0 auto;padding:10px 16px;">Cancel</button>
       </div>
     </div>
@@ -2226,7 +2226,7 @@ function promptFreezeUser(userId, userName) {
   modal.innerHTML = `
     <div class="card" style="background:var(--bg-card); border:1px solid var(--border-color); border-radius:var(--radius-lg); padding:24px; width:100%; max-width:440px; animation:scaleUp 0.2s ease; margin:0; box-shadow:var(--shadow-lg);">
       <h3 style="font-size:16px; font-weight:800; color:var(--text-primary); margin: 0 0 6px; display:flex; align-items:center; gap:8px;">
-        â„ï¸ Freeze User: ${userName}
+        ❄️ Freeze User: ${userName}
       </h3>
       <p style="font-size:12px; color:var(--text-secondary); margin: 0 0 20px; line-height: 1.4;">
         Choose a preset duration or pick a custom Date & Time to suspend this user's step logging and leaderboard updates. Unfreezing happens automatically.
@@ -2256,7 +2256,7 @@ function promptFreezeUser(userId, userName) {
 
       <div style="display:flex; gap:10px;">
         <button onclick="submitUserFreeze('${userId}')" class="btn btn-primary" style="flex:1; font-weight:700; background:var(--warning); border-color:var(--warning); color:white;">
-          â„ï¸ Freeze Account
+          ❄️ Freeze Account
         </button>
         <button onclick="document.getElementById('adminFreezeModal').remove()" class="btn btn-outline" style="flex:0 0 auto; padding:10px 16px;">
           Cancel
@@ -2391,20 +2391,20 @@ function sortAndRenderAdminWinners() {
   const filterHtml = `
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:12px;">
       <div style="display:flex; gap:8px; flex-wrap:wrap;">
-        ${[['pending','â³ Pending','var(--warning)'],['approved','âœ… Approved','var(--secondary)'],['rejected','âŒ Rejected','var(--danger)'],['all','ðŸ“‹ All','var(--text-secondary)']].map(([val, label, clr]) =>
+        ${[['pending','⏳ Pending','var(--warning)'],['approved','✅ Approved','var(--secondary)'],['rejected','❌ Rejected','var(--danger)'],['all','📋 All','var(--text-secondary)']].map(([val, label, clr]) =>
           `<button onclick="loadAdminWinners('${val}')" style="padding:6px 14px; border-radius:20px; border:1px solid ${clr}; background:${adminWinnersFilter===val ? clr : 'transparent'}; color:${adminWinnersFilter===val ? 'white' : clr}; font-size:12px; font-weight:700; cursor:pointer; transition:all 0.2s;">${label}</button>`
         ).join('')}
       </div>
       <select id="adminWinnerSortSelect" class="form-input" style="padding: 8px 12px; font-size: 12px; border-radius: 10px; background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); color: var(--text-primary); outline: none; width:auto; cursor:pointer;" onchange="sortAndRenderAdminWinners()">
-        <option value="newest" ${sortBy === 'newest' ? 'selected' : ''}>ðŸ“… Newest First</option>
-        <option value="score_desc" ${sortBy === 'score_desc' ? 'selected' : ''}>ðŸ… Score (Highest)</option>
-        <option value="name_asc" ${sortBy === 'name_asc' ? 'selected' : ''}>ðŸ”¤ Name (A-Z)</option>
+        <option value="newest" ${sortBy === 'newest' ? 'selected' : ''}>📅 Newest First</option>
+        <option value="score_desc" ${sortBy === 'score_desc' ? 'selected' : ''}>🏅 Score (Highest)</option>
+        <option value="name_asc" ${sortBy === 'name_asc' ? 'selected' : ''}>🔤 Name (A-Z)</option>
       </select>
     </div>
   `;
 
   if (allAdminWinners.length === 0) {
-    container.innerHTML = filterHtml + `<div class="empty-state"><div class="empty-icon">ðŸ†</div><div class="empty-text">No posts in this category</div></div>`;
+    container.innerHTML = filterHtml + `<div class="empty-state"><div class="empty-icon">🏆</div><div class="empty-text">No posts in this category</div></div>`;
     return;
   }
 
@@ -2424,14 +2424,14 @@ function sortAndRenderAdminWinners() {
         const categoryMeta = getCategoryLabel(p.category);
         const freq = p.frequency || 'monthly';
         const statusColor = p.approval_status === 'approved' ? 'var(--secondary)' : p.approval_status === 'rejected' ? 'var(--danger)' : 'var(--warning)';
-        const statusEmoji = p.approval_status === 'approved' ? 'âœ…' : p.approval_status === 'rejected' ? 'âŒ' : 'â³';
+        const statusEmoji = p.approval_status === 'approved' ? '✅' : p.approval_status === 'rejected' ? '❌' : '⏳';
 
         const cycleStart = p.cycle_start ? new Date(p.cycle_start) : null;
         let cycleLabel = '';
         if (freq === 'weekly' && cycleStart) {
           const weekEnd = new Date(cycleStart);
           weekEnd.setDate(cycleStart.getDate() + 6);
-          cycleLabel = `Week of ${cycleStart.toLocaleDateString('en-IN', {day:'numeric',month:'short'})}â€“${weekEnd.toLocaleDateString('en-IN', {day:'numeric',month:'short'})}`;
+          cycleLabel = `Week of ${cycleStart.toLocaleDateString('en-IN', {day:'numeric',month:'short'})}–${weekEnd.toLocaleDateString('en-IN', {day:'numeric',month:'short'})}`;
         } else if (cycleStart) {
           cycleLabel = cycleStart.toLocaleDateString('en-IN', { month:'long', year:'numeric' });
         }
@@ -2443,7 +2443,7 @@ function sortAndRenderAdminWinners() {
         } else if (p.media_type === 'audio' && p.media_url) {
           mediaPrev = `<audio controls style="width:100%; margin:10px 0; border-radius: 8px;"><source src="${p.media_url}"></audio>`;
         } else {
-          mediaPrev = `<div style="font-size:11px; color:var(--text-muted); margin:6px 0; font-style:italic;">ðŸ“­ No media uploaded</div>`;
+          mediaPrev = `<div style="font-size:11px; color:var(--text-muted); margin:6px 0; font-style:italic;">📭 No media uploaded</div>`;
         }
 
         return `
@@ -2459,16 +2459,16 @@ function sortAndRenderAdminWinners() {
               <div>
                 <div style="font-weight:700; font-size:14px; color:var(--text-primary);">${p.user_id?.name || 'Unknown User'}</div>
                 <div style="font-size:11px; color:var(--primary-light); font-weight:600; margin-top:2px;">
-                  ${categoryMeta.emoji} ${categoryMeta.text} Â· ${p.level === 'state' ? 'State Level' : (getDistrictName(p.district) || 'District Level')}
+                  ${categoryMeta.emoji} ${categoryMeta.text} · ${p.level === 'state' ? 'State Level' : (getDistrictName(p.district) || 'District Level')}
                 </div>
               </div>
             </div>
 
             <!-- Cycle Meta details -->
             <div style="font-size:12px; color:var(--text-secondary); display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-top:4px;">
-              <span style="background:var(--bg-glass-light); padding:2px 8px; border-radius:6px; border:1px solid var(--border-color);">${freq === 'weekly' ? 'ðŸ“… Weekly' : 'ðŸ—“ï¸ Monthly'}</span>
-              <span>ðŸ… <strong>${(p.value || 0).toLocaleString()}</strong> pts</span>
-              <span style="opacity:0.6;">Â· ${cycleLabel}</span>
+              <span style="background:var(--bg-glass-light); padding:2px 8px; border-radius:6px; border:1px solid var(--border-color);">${freq === 'weekly' ? '📅 Weekly' : '🗓️ Monthly'}</span>
+              <span>🏅 <strong>${(p.value || 0).toLocaleString()}</strong> pts</span>
+              <span style="opacity:0.6;">· ${cycleLabel}</span>
             </div>
 
             ${mediaPrev}
@@ -2477,9 +2477,9 @@ function sortAndRenderAdminWinners() {
 
             <!-- Action buttons -->
             <div style="display:flex; gap:8px; margin-top:8px; flex-wrap:wrap; border-top: 1px solid rgba(255,255,255,0.04); padding-top:12px; justify-content:flex-end;">
-              ${p.approval_status !== 'approved' ? `<button class="btn btn-sm btn-success" onclick="handleApproveWinnerPost('${p._id}')" style="min-width:80px; padding:6px 14px; border-radius:8px; font-size:12px;">âœ… Approve</button>` : ''}
-              ${p.approval_status !== 'rejected' ? `<button class="btn btn-sm" onclick="handleRejectWinnerPost('${p._id}')" style="min-width:80px; background:rgba(239,68,68,0.1); border:1px solid var(--danger); color:var(--danger); font-weight:600; padding:6px 14px; border-radius:8px; font-size:12px;">âŒ Reject</button>` : ''}
-              <button class="btn btn-sm" onclick="handleDeleteWinnerPost('${p._id}')" style="background:rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.25); color:var(--danger); font-weight:600; padding:6px 14px; border-radius:8px; font-size:12px;">ðŸ—‘ï¸ Delete</button>
+              ${p.approval_status !== 'approved' ? `<button class="btn btn-sm btn-success" onclick="handleApproveWinnerPost('${p._id}')" style="min-width:80px; padding:6px 14px; border-radius:8px; font-size:12px;">✅ Approve</button>` : ''}
+              ${p.approval_status !== 'rejected' ? `<button class="btn btn-sm" onclick="handleRejectWinnerPost('${p._id}')" style="min-width:80px; background:rgba(239,68,68,0.1); border:1px solid var(--danger); color:var(--danger); font-weight:600; padding:6px 14px; border-radius:8px; font-size:12px;">❌ Reject</button>` : ''}
+              <button class="btn btn-sm" onclick="handleDeleteWinnerPost('${p._id}')" style="background:rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.25); color:var(--danger); font-weight:600; padding:6px 14px; border-radius:8px; font-size:12px;">🗑️ Delete</button>
             </div>
           </div>
         `;
@@ -2491,7 +2491,7 @@ function sortAndRenderAdminWinners() {
 async function handleApproveWinnerPost(postId) {
   try {
     await api.approveWinnerPost(postId);
-    showToast('âœ… Winner post approved! Now visible in feed.', 'success');
+    showToast('✅ Winner post approved! Now visible in feed.', 'success');
     loadAdminWinners();
   } catch (e) {
     showToast(e.message, 'error');
@@ -2559,18 +2559,18 @@ function generateAIChatHTML() {
   return `
     <div class="card premium-ai-card">
       <div class="section-title">
-        <span class="title-icon">ðŸ¤–</span>
+        <span class="title-icon">🤖</span>
         <span data-i18n="aiCoachTitle">AI Health Coach</span>
       </div>
       <div class="ai-chat-box" id="aiChatBox">
         <div class="ai-chat-msg assistant">
-          ðŸ‘‹ ${t('aiCoachGreeting')}
+          👋 ${t('aiCoachGreeting')}
         </div>
       </div>
       <div class="ai-chat-input-wrapper">
         <input type="text" class="form-input ai-input" id="aiChatInput" placeholder="${t('aiChatPlaceholder')}" onkeypress="handleAIChatKeyPress(event)">
         <button class="btn btn-primary btn-sm" onclick="handleAIChatSubmit()" id="aiChatSendBtn">
-          <span>ðŸ“¤</span>
+          <span>📤</span>
         </button>
       </div>
     </div>
@@ -2666,7 +2666,7 @@ function initAIChatBox() {
   } else {
     chatBox.innerHTML = `
       <div class="ai-chat-msg assistant">
-        ðŸ‘‹ ${t('aiCoachGreeting')}
+        👋 ${t('aiCoachGreeting')}
       </div>
     `;
   }
