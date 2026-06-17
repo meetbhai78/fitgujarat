@@ -1,11 +1,20 @@
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const { v2: cloudinary } = require('cloudinary');
 const User = require('../models/User');
 const UserStreak = require('../models/UserStreak');
+const UserReport = require('../models/UserReport');
 const { GUJARAT_DISTRICTS } = require('../config/districts');
 const auth = require('../middleware/auth');
 const roleGuard = require('../middleware/roleGuard');
+const upload = require('../middleware/upload');
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key:    process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET
+});
 
 const router = express.Router();
 
@@ -203,6 +212,109 @@ router.put('/language', auth, async (req, res) => {
 
     res.json({ message: 'Language updated.', user });
   } catch (error) {
+    res.status(500).json({ error: 'Server error.' });
+  }
+});
+
+/**
+ * PUT /api/auth/profile
+ * Update own name
+ */
+router.put('/profile', auth, async (req, res) => {
+  try {
+    const { name } = req.body;
+    if (!name || name.trim().length < 2) {
+      return res.status(400).json({ error: 'Name must be at least 2 characters.' });
+    }
+    const user = await User.findByIdAndUpdate(
+      req.userId,
+      { name: name.trim() },
+      { new: true }
+    ).select('-password_hash');
+    res.json({ message: 'Profile updated.', user });
+  } catch (error) {
+    res.status(500).json({ error: 'Server error.' });
+  }
+});
+
+/**
+ * POST /api/auth/profile/photo
+ * Upload own profile photo via Cloudinary
+ */
+router.post('/profile/photo', auth, upload.single('photo'), async (req, res) => {
+  try {
+    if (!req.file) return res.status(400).json({ error: 'No file uploaded.' });
+
+    // Upload to cloudinary
+    const uploadResult = await new Promise((resolve, reject) => {
+      const stream = cloudinary.uploader.upload_stream(
+        { folder: 'stepcount/avatars', transformation: [{ width: 400, height: 400, crop: 'fill', gravity: 'face' }] },
+        (error, result) => { if (error) reject(error); else resolve(result); }
+      );
+      stream.end(req.file.buffer);
+    });
+
+    const user = await User.findByIdAndUpdate(
+      req.userId,
+      { profile_photo_url: uploadResult.secure_url },
+      { new: true }
+    ).select('-password_hash');
+
+    res.json({ message: 'Profile photo updated.', profile_photo_url: uploadResult.secure_url, user });
+  } catch (error) {
+    console.error('Profile photo upload error:', error);
+    res.status(500).json({ error: 'Failed to upload photo.' });
+  }
+});
+
+/**
+ * DELETE /api/auth/profile/photo
+ * Remove own profile photo
+ */
+router.delete('/profile/photo', auth, async (req, res) => {
+  try {
+    const user = await User.findByIdAndUpdate(
+      req.userId,
+      { profile_photo_url: '' },
+      { new: true }
+    ).select('-password_hash');
+    res.json({ message: 'Profile photo removed.', user });
+  } catch (error) {
+    res.status(500).json({ error: 'Server error.' });
+  }
+});
+
+/**
+ * POST /api/auth/report/:userId
+ * Report another user
+ */
+router.post('/report/:userId', auth, async (req, res) => {
+  try {
+    const { reason, details } = req.body;
+    const reportedId = req.params.userId;
+
+    if (reportedId === req.userId.toString()) {
+      return res.status(400).json({ error: 'You cannot report yourself.' });
+    }
+
+    const validReasons = ['fake_steps', 'inappropriate_content', 'harassment', 'spam', 'other'];
+    if (!reason || !validReasons.includes(reason)) {
+      return res.status(400).json({ error: 'Invalid reason.' });
+    }
+
+    const reportedUser = await User.findById(reportedId);
+    if (!reportedUser) return res.status(404).json({ error: 'User not found.' });
+
+    // Upsert — prevent duplicate reports
+    await UserReport.findOneAndUpdate(
+      { reporter_id: req.userId, reported_id: reportedId },
+      { reason, details: details || '', status: 'pending', reviewed_by: null, reviewed_at: null, created_at: new Date() },
+      { upsert: true, new: true }
+    );
+
+    res.json({ message: 'Report submitted successfully.' });
+  } catch (error) {
+    console.error('Report user error:', error);
     res.status(500).json({ error: 'Server error.' });
   }
 });

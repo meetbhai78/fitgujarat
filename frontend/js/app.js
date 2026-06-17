@@ -799,10 +799,14 @@ async function loadLeaderboard() {
     let podiumHtml = '<div class="podium">';
     podiumOrder.forEach((entry, i) => {
       const actualRank = i === 0 ? 2 : i === 1 ? 1 : 3;
+      const rankClass = `rank-${actualRank}`;
       const isYou = entry.user_id === data.userId;
+      const avatarContent = entry.profile_photo_url
+        ? `<img src="${entry.profile_photo_url}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`
+        : `<span style="font-weight:800;font-size:${actualRank===1?'20px':'16px'}">${getInitials(entry.name)}</span>`;
       podiumHtml += `
         <div class="podium-item">
-          <div class="podium-avatar" ${isYou ? 'style="border-color:var(--primary);"' : ''}>${getInitials(entry.name)}</div>
+          <div class="user-avatar ${actualRank===1?'lg':'md'} ${rankClass}" style="margin:0 auto 6px; ${isYou?'outline:2px solid var(--primary);':''}">${avatarContent}</div>
           <div class="podium-name" ${isYou ? 'style="color:var(--primary);"' : ''}>${entry.name || 'User'}</div>
           <div class="podium-score">${formatNumber(entry.value)}</div>
           <div class="podium-bar">${actualRank}</div>
@@ -812,17 +816,23 @@ async function loadLeaderboard() {
     podiumHtml += '</div>';
 
     // Rank list (4+)
+    const currentUser = getUser();
     let listHtml = '<div class="rank-list">';
     rankings.slice(3).forEach(entry => {
       const isYou = entry.user_id === data.userId;
+      const avatarContent = entry.profile_photo_url
+        ? `<img src="${entry.profile_photo_url}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`
+        : `<span style="font-size:11px;font-weight:700;">${getInitials(entry.name)}</span>`;
       listHtml += `
         <div class="rank-item ${isYou ? 'is-you' : ''}">
           <div class="rank-number">${entry.rank}</div>
+          <div class="user-avatar sm" style="margin:0 4px 0 0;">${avatarContent}</div>
           <div class="rank-info">
             <div class="rank-name">${entry.name || 'User'}</div>
             <div class="rank-district">${getDistrictName(entry.district || '')}</div>
           </div>
           <div class="rank-value">${formatNumber(entry.value)}</div>
+          ${!isYou ? `<button class="report-btn" onclick="openReportModal('${entry.user_id}','${(entry.name||'User').replace(/'/g,"\\'")}')" title="Report user">🚩</button>` : ''}
         </div>
       `;
     });
@@ -1230,15 +1240,44 @@ async function renderProfile(container) {
     { name: t('diamondStreak'), icon: '💎🔥', days: 365, earned: (streak?.longest_streak || 0) >= 365 },
   ];
 
+  // Build avatar HTML
+  const avatarHtml = user.profile_photo_url
+    ? `<img src="${user.profile_photo_url}" alt="Profile" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`
+    : `<span style="color:var(--primary);font-size:32px;font-weight:800;">${getInitials(user.name)}</span>`;
+
   container.innerHTML = `
     <div class="page-content">
+      <!-- Profile Header -->
       <div class="profile-header">
-        <div class="profile-avatar">${getInitials(user.name)}</div>
-        <h2 class="profile-name">${user.name}</h2>
+        <div style="position:relative; display:inline-block; margin-bottom:12px;">
+          <div class="user-avatar xl" style="margin:0 auto;" id="profileAvatarDisplay">
+            ${avatarHtml}
+          </div>
+          <label for="profilePhotoInput" style="position:absolute;bottom:4px;right:4px;width:28px;height:28px;border-radius:50%;background:var(--gradient-primary);display:flex;align-items:center;justify-content:center;cursor:pointer;border:2px solid var(--bg-primary);box-shadow:var(--shadow-sm);" title="Change photo">
+            📷
+          </label>
+          <input type="file" id="profilePhotoInput" accept="image/*" style="display:none;" onchange="handleProfilePhotoUpload(this)">
+        </div>
+        <h2 class="profile-name" id="profileNameDisplay">${user.name}</h2>
         <p class="profile-district">📍 ${getDistrictName(user.district)}</p>
         <p class="profile-state">🇮🇳 ${t('stateFixed')}</p>
+        <div style="display:flex;gap:8px;justify-content:center;margin-top:8px;">
+          <button class="sort-pill" onclick="toggleProfileEdit()" id="editProfileBtn" style="font-size:12px;">✏️ Edit Name</button>
+          ${user.profile_photo_url ? `<button class="sort-pill" onclick="handleRemoveProfilePhoto()" style="border-color:rgba(239,68,68,0.4);color:var(--danger);">🗑️ Remove Photo</button>` : ''}
+        </div>
       </div>
 
+      <!-- Edit Name Section (hidden by default) -->
+      <div class="profile-edit-section" id="profileEditSection" style="display:none;">
+        <div style="font-size:13px;font-weight:700;color:var(--text-primary);">✏️ Edit Display Name</div>
+        <input type="text" id="profileNameInput" class="form-input" value="${user.name}" placeholder="Your full name" style="font-size:14px;">
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-primary" style="flex:1;padding:10px;" onclick="handleProfileNameSave()">💾 Save</button>
+          <button class="btn btn-outline" style="flex:1;padding:10px;" onclick="toggleProfileEdit()">Cancel</button>
+        </div>
+      </div>
+
+      <!-- Streak Stats -->
       <div class="card">
         <div class="section-title"><span class="title-icon"><span class="flame-animation">🔥</span></span> ${t('streakStats')}</div>
         <div class="stat-grid" style="grid-template-columns: repeat(2, 1fr);">
@@ -1261,6 +1300,7 @@ async function renderProfile(container) {
         </div>
       </div>
 
+      <!-- Badges -->
       <div class="card">
         <div class="section-title"><span class="title-icon">🎖️</span> ${t('badges')}</div>
         <div class="badge-grid">
@@ -1274,6 +1314,7 @@ async function renderProfile(container) {
         </div>
       </div>
 
+      <!-- AI Recommendations -->
       <div class="card">
         <div class="section-title"><span class="title-icon">🤖</span> ${t('recommendations')}</div>
         <div id="profileRecs" class="loading-spinner"><div class="spinner"></div></div>
@@ -1281,6 +1322,7 @@ async function renderProfile(container) {
 
       ${generateAIChatHTML()}
 
+      <!-- Settings -->
       <div class="card">
         <div class="section-title"><span class="title-icon">⚙️</span> ${t('settings')}</div>
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
@@ -1323,6 +1365,145 @@ async function renderProfile(container) {
 
   initAIChatBox();
 }
+
+function toggleProfileEdit() {
+  const section = document.getElementById('profileEditSection');
+  if (section) section.style.display = section.style.display === 'none' ? 'flex' : 'none';
+}
+
+async function handleProfileNameSave() {
+  const input = document.getElementById('profileNameInput');
+  if (!input) return;
+  const name = input.value.trim();
+  if (name.length < 2) { showToast('Name must be at least 2 characters.', 'error'); return; }
+
+  try {
+    const result = await api.updateProfileName(name);
+    // Update local storage
+    const user = getUser();
+    if (user) {
+      user.name = result.user.name;
+      localStorage.setItem('user', JSON.stringify(user));
+    }
+    document.getElementById('profileNameDisplay').textContent = result.user.name;
+    toggleProfileEdit();
+    showToast('✅ Name updated!', 'success');
+  } catch (e) {
+    showToast(e.message || 'Failed to update name.', 'error');
+  }
+}
+
+async function handleProfilePhotoUpload(input) {
+  if (!input.files || !input.files[0]) return;
+  const file = input.files[0];
+  if (file.size > 5 * 1024 * 1024) { showToast('Photo must be under 5MB.', 'error'); return; }
+
+  showToast('⏳ Uploading photo...', 'info');
+  const formData = new FormData();
+  formData.append('photo', file);
+
+  try {
+    const result = await api.uploadProfilePhoto(formData);
+    // Update local storage
+    const user = getUser();
+    if (user) {
+      user.profile_photo_url = result.profile_photo_url;
+      localStorage.setItem('user', JSON.stringify(user));
+    }
+    // Update avatar display
+    const display = document.getElementById('profileAvatarDisplay');
+    if (display) display.innerHTML = `<img src="${result.profile_photo_url}" alt="Profile" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+    showToast('✅ Profile photo updated!', 'success');
+  } catch (e) {
+    showToast(e.message || 'Failed to upload photo.', 'error');
+  }
+}
+
+async function handleRemoveProfilePhoto() {
+  if (!confirm('Remove your profile photo?')) return;
+  try {
+    const result = await api.removeProfilePhoto();
+    const user = getUser();
+    if (user) {
+      user.profile_photo_url = '';
+      localStorage.setItem('user', JSON.stringify(user));
+    }
+    const display = document.getElementById('profileAvatarDisplay');
+    if (display) display.innerHTML = `<span style="color:var(--primary);font-size:32px;font-weight:800;">${getInitials(user.name)}</span>`;
+    showToast('Photo removed.', 'info');
+    renderCurrentPage();
+  } catch (e) {
+    showToast(e.message || 'Failed to remove photo.', 'error');
+  }
+}
+
+// ---- Report User Modal ----
+function openReportModal(userId, userName) {
+  // Remove existing modal if any
+  const old = document.getElementById('reportModal');
+  if (old) old.remove();
+
+  const reasons = [
+    { value: 'fake_steps', label: '🎭 Fake Steps / Cheating' },
+    { value: 'inappropriate_content', label: '🚫 Inappropriate Content' },
+    { value: 'harassment', label: '😡 Harassment' },
+    { value: 'spam', label: '📢 Spam' },
+    { value: 'other', label: '📋 Other' },
+  ];
+
+  const modal = document.createElement('div');
+  modal.id = 'reportModal';
+  modal.style.cssText = 'position:fixed;inset:0;z-index:9999;display:flex;align-items:flex-end;justify-content:center;background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);';
+  modal.innerHTML = `
+    <div style="background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:var(--radius-lg) var(--radius-lg) 0 0;padding:24px;width:100%;max-width:480px;max-height:85vh;overflow-y:auto;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+        <div style="font-size:16px;font-weight:700;color:var(--text-primary);">🚩 Report User</div>
+        <button onclick="document.getElementById('reportModal').remove()" style="color:var(--text-muted);font-size:20px;background:none;border:none;cursor:pointer;">✕</button>
+      </div>
+      <div style="font-size:13px;color:var(--text-secondary);margin-bottom:16px;">Reporting: <strong style="color:var(--text-primary);">${userName}</strong></div>
+
+      <div style="margin-bottom:14px;">
+        <div style="font-size:12px;font-weight:700;color:var(--text-secondary);margin-bottom:8px;">REASON</div>
+        ${reasons.map((r, i) => `
+          <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--radius-sm);border:1px solid var(--border-color);margin-bottom:6px;cursor:pointer;transition:all 0.15s;" onmouseenter="this.style.borderColor='var(--primary)'" onmouseleave="this.style.borderColor='var(--border-color)'">
+            <input type="radio" name="reportReason" value="${r.value}" ${i===0?'checked':''} style="accent-color:var(--primary);">
+            <span style="font-size:13px;">${r.label}</span>
+          </label>
+        `).join('')}
+      </div>
+
+      <div style="margin-bottom:16px;">
+        <div style="font-size:12px;font-weight:700;color:var(--text-secondary);margin-bottom:8px;">ADDITIONAL DETAILS (optional)</div>
+        <textarea id="reportDetails" class="form-input" placeholder="Describe the issue..." rows="3" style="resize:vertical;min-height:80px;font-size:13px;"></textarea>
+      </div>
+
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-primary" style="flex:1;background:var(--danger);border-color:var(--danger);" onclick="submitReport('${userId}','${userName}')">🚩 Submit Report</button>
+        <button class="btn btn-outline" style="flex:1;" onclick="document.getElementById('reportModal').remove()">Cancel</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(modal);
+  modal.addEventListener('click', (e) => { if (e.target === modal) modal.remove(); });
+}
+
+async function submitReport(userId, userName) {
+  const reasonEl = document.querySelector('input[name="reportReason"]:checked');
+  const detailsEl = document.getElementById('reportDetails');
+  if (!reasonEl) { showToast('Please select a reason.', 'error'); return; }
+
+  const reason = reasonEl.value;
+  const details = detailsEl ? detailsEl.value.trim() : '';
+
+  try {
+    await api.reportUser(userId, reason, details);
+    document.getElementById('reportModal')?.remove();
+    showToast(`🚩 Report submitted for ${userName}.`, 'success');
+  } catch (e) {
+    showToast(e.message || 'Failed to submit report.', 'error');
+  }
+}
+
 
 // ---- ADMIN ----
 async function renderAdmin(container) {
@@ -1386,6 +1567,9 @@ async function renderAdmin(container) {
         </button>
         <button class="segment-btn ${adminSubView === 'flags' ? 'active' : ''}" onclick="switchAdminSubView('flags')">
           ⚠️ Fraud
+        </button>
+        <button class="segment-btn ${adminSubView === 'reports' ? 'active' : ''}" onclick="switchAdminSubView('reports')">
+          🚩 Reports
         </button>
       </div>
 
@@ -1465,6 +1649,22 @@ async function renderAdminTabContent() {
       </div>
     `;
     loadFraudFlags();
+  } else if (adminSubView === 'reports') {
+    container.innerHTML = `
+      <div class="card">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:12px;">
+          <div class="section-title" style="margin-bottom:0;"><span class="title-icon">🚩</span> User Reports</div>
+          <div class="sort-bar" id="adminReportStatusBar">
+            <button class="sort-pill active" data-status="pending" onclick="setReportStatus(this)">⏳ Pending</button>
+            <button class="sort-pill" data-status="reviewed" onclick="setReportStatus(this)">✅ Reviewed</button>
+            <button class="sort-pill" data-status="dismissed" onclick="setReportStatus(this)">🚫 Dismissed</button>
+            <button class="sort-pill" data-status="all" onclick="setReportStatus(this)">📋 All</button>
+          </div>
+        </div>
+        <div id="adminReportsList" class="loading-spinner"><div class="spinner"></div></div>
+      </div>
+    `;
+    loadAdminReports('pending');
   }
 }
 
@@ -1929,8 +2129,8 @@ function renderFilteredAdminUsers(users) {
             <!-- Top section: Avatar + Info -->
             <div style="display:flex; gap:12px; align-items:flex-start;">
               <!-- Avatar -->
-              <div style="width:46px; height:46px; border-radius:50%; background: linear-gradient(135deg, var(--bg-elevated) 0%, rgba(255,255,255,0.03) 100%); border: 1.5px solid var(--border-light); display:flex; align-items:center; justify-content:center; font-weight:800; font-size:16px; color:var(--text-primary); flex-shrink:0; box-shadow: var(--shadow-sm);">
-                ${initials}
+              <div style="width:46px; height:46px; border-radius:50%; background: linear-gradient(135deg, var(--bg-elevated) 0%, rgba(255,255,255,0.03) 100%); border: 1.5px solid var(--border-light); display:flex; align-items:center; justify-content:center; font-weight:800; font-size:16px; color:var(--text-primary); flex-shrink:0; box-shadow: var(--shadow-sm); overflow:hidden;">
+                ${u.profile_photo_url ? `<img src="${u.profile_photo_url}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">` : initials}
               </div>
               
               <!-- Info details -->
@@ -1983,6 +2183,7 @@ function renderFilteredAdminUsers(users) {
                     ❄️ Freeze
                    </button>`
               }
+              ${u.profile_photo_url ? `<button class="btn btn-sm" style="background:rgba(156,163,175,0.1); border:1px solid rgba(156,163,175,0.3); color:var(--text-secondary); font-weight:600; padding:6px 12px; border-radius:8px; font-size:12px;" onclick="handleAdminRemoveUserPhoto('${u._id}','${(u.name||'').replace(/'/g,"\\'")}')">🖼️ Remove Photo</button>` : ''}
               <button class="btn btn-sm" style="background:rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.25); color:var(--danger); font-weight:600; padding:6px 12px; border-radius:8px; font-size:12px;" onclick="handleDeleteUser('${u._id}', '${(u.name || '').replace(/'/g, "\\'")}')">
                 🗑️ ${t('delete')}
               </button>
@@ -2001,6 +2202,105 @@ function renderFilteredAdminUsers(users) {
       }).join('')}
     </div>
   `;
+}
+
+async function loadAdminReports(status = 'pending') {
+  const container = document.getElementById('adminReportsList');
+  if (!container) return;
+  container.innerHTML = '<div class="loading-spinner"><div class="spinner"></div></div>';
+
+  try {
+    const data = await api.getAdminReports(status);
+    const reports = data.reports || [];
+    container.classList.remove('loading-spinner');
+
+    if (reports.length === 0) {
+      container.innerHTML = `<div class="empty-state" style="padding:24px;text-align:center;"><div style="font-size:32px;margin-bottom:8px;">✅</div><div style="font-size:13px;color:var(--text-secondary);">No ${status} reports found</div></div>`;
+      return;
+    }
+
+    const reasonLabels = { fake_steps: '🎭 Fake Steps', inappropriate_content: '🚫 Inappropriate', harassment: '😡 Harassment', spam: '📢 Spam', other: '📋 Other' };
+
+    container.innerHTML = `<div style="display:flex;flex-direction:column;gap:12px;">
+      ${reports.map(r => {
+        const reporter = r.reporter_id || {};
+        const reported = r.reported_id || {};
+        const reporterAvatar = reporter.profile_photo_url
+          ? `<img src="${reporter.profile_photo_url}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`
+          : `<span style="font-size:11px;font-weight:700;">${getInitials(reporter.name)}</span>`;
+        const reportedAvatar = reported.profile_photo_url
+          ? `<img src="${reported.profile_photo_url}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`
+          : `<span style="font-size:11px;font-weight:700;color:var(--danger)">${getInitials(reported.name)}</span>`;
+        return `
+          <div class="report-card" style="gap:0;flex-direction:column;">
+            <div style="display:flex;gap:12px;align-items:flex-start;">
+              <!-- Reporter -->
+              <div style="display:flex;flex-direction:column;align-items:center;gap:4px;min-width:56px;">
+                <div style="width:36px;height:36px;border-radius:50%;background:var(--bg-elevated);border:1.5px solid var(--border-light);display:flex;align-items:center;justify-content:center;overflow:hidden;">${reporterAvatar}</div>
+                <div style="font-size:9px;color:var(--text-muted);text-align:center;">Reporter</div>
+              </div>
+              <div style="font-size:18px;color:var(--text-muted);margin-top:8px;">→</div>
+              <!-- Reported -->
+              <div style="display:flex;flex-direction:column;align-items:center;gap:4px;min-width:56px;">
+                <div style="width:36px;height:36px;border-radius:50%;background:rgba(239,68,68,0.12);border:1.5px solid rgba(239,68,68,0.3);display:flex;align-items:center;justify-content:center;overflow:hidden;">${reportedAvatar}</div>
+                <div style="font-size:9px;color:var(--danger);text-align:center;">Reported</div>
+              </div>
+              <!-- Info -->
+              <div style="flex:1;min-width:0;">
+                <div style="font-size:13px;font-weight:700;color:var(--text-primary);">${reporter.name || 'Unknown'} <span style="color:var(--text-muted);font-weight:400;">reported</span> ${reported.name || 'Unknown'}</div>
+                <div style="font-size:11px;color:var(--text-secondary);margin-top:2px;">${getDistrictName(reported.district) || ''}</div>
+                <div style="margin-top:6px;"><span class="report-badge ${r.reason}">${reasonLabels[r.reason] || r.reason}</span></div>
+                ${r.details ? `<div style="font-size:12px;color:var(--text-secondary);margin-top:6px;padding:6px 8px;background:var(--bg-elevated);border-radius:6px;">${r.details}</div>` : ''}
+                <div style="font-size:10px;color:var(--text-muted);margin-top:6px;">📅 ${new Date(r.created_at).toLocaleDateString()}</div>
+              </div>
+            </div>
+            ${r.status === 'pending' ? `
+            <div style="display:flex;gap:8px;margin-top:12px;border-top:1px solid var(--border-color);padding-top:10px;">
+              <button class="btn btn-sm" style="flex:1;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);color:var(--danger);font-size:11px;" onclick="handleAdminRemoveUserPhoto('${reported._id}','${(reported.name||'').replace(/'/g,"\\'")}')">🖼️ Remove Photo</button>
+              <button class="btn btn-sm" style="flex:1;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.3);color:var(--warning);font-size:11px;" onclick="handleAdminReportAction('${r._id}')">✅ Mark Reviewed</button>
+              <button class="btn btn-sm" style="flex:1;background:rgba(107,114,128,0.1);border:1px solid var(--border-color);color:var(--text-secondary);font-size:11px;" onclick="handleAdminReportDismiss('${r._id}')">🚫 Dismiss</button>
+            </div>` : `<div style="font-size:11px;color:var(--text-muted);margin-top:8px;border-top:1px solid var(--border-color);padding-top:8px;">Status: <strong>${r.status}</strong></div>`}
+          </div>
+        `;
+      }).join('')}
+    </div>`;
+  } catch (e) {
+    container.innerHTML = `<p style="text-align:center;color:var(--text-muted);padding:24px;">Failed to load reports.</p>`;
+  }
+}
+
+function setReportStatus(btn) {
+  document.querySelectorAll('#adminReportStatusBar .sort-pill').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  loadAdminReports(btn.dataset.status);
+}
+
+async function handleAdminReportAction(reportId) {
+  try {
+    await api.actionReport(reportId);
+    showToast('✅ Report marked as reviewed.', 'success');
+    // reload current status
+    const activeBtn = document.querySelector('#adminReportStatusBar .sort-pill.active');
+    loadAdminReports(activeBtn?.dataset.status || 'pending');
+  } catch(e) { showToast(e.message || 'Failed.', 'error'); }
+}
+
+async function handleAdminReportDismiss(reportId) {
+  try {
+    await api.dismissReport(reportId);
+    showToast('🚫 Report dismissed.', 'info');
+    const activeBtn = document.querySelector('#adminReportStatusBar .sort-pill.active');
+    loadAdminReports(activeBtn?.dataset.status || 'pending');
+  } catch(e) { showToast(e.message || 'Failed.', 'error'); }
+}
+
+async function handleAdminRemoveUserPhoto(userId, userName) {
+  if (!confirm(`Remove profile photo for ${userName}?`)) return;
+  try {
+    await api.adminRemoveUserPhoto(userId);
+    showToast(`🖼️ Photo removed for ${userName}.`, 'success');
+    loadAdminUsers();
+  } catch(e) { showToast(e.message || 'Failed.', 'error'); }
 }
 
 async function toggleUserHistoryDetail(userId) {

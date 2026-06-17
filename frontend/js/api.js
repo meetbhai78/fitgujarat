@@ -143,6 +143,18 @@ class ApiClient {
   async approveWinnerPost(postId) { return this.request('POST', `/admin/winner-posts/${postId}/approve`); }
   async rejectWinnerPost(postId) { return this.request('POST', `/admin/winner-posts/${postId}/reject`); }
   async deleteWinnerPost(postId) { return this.request('DELETE', `/admin/winner-posts/${postId}`); }
+
+  // ── Profile ───────────────────────────────────────────────────────────────
+  async updateProfileName(name) { return this.request('PUT', '/auth/profile', { name }); }
+  async uploadProfilePhoto(formData) { return this.uploadRequest('POST', '/auth/profile/photo', formData); }
+  async removeProfilePhoto() { return this.request('DELETE', '/auth/profile/photo'); }
+
+  // ── User Reports ──────────────────────────────────────────────────────────
+  async reportUser(userId, reason, details) { return this.request('POST', `/auth/report/${userId}`, { reason, details }); }
+  async getAdminReports(status = 'pending') { return this.request('GET', `/admin/reports?status=${status}`); }
+  async dismissReport(reportId) { return this.request('POST', `/admin/reports/${reportId}/dismiss`); }
+  async actionReport(reportId) { return this.request('POST', `/admin/reports/${reportId}/action`); }
+  async adminRemoveUserPhoto(userId) { return this.request('DELETE', `/admin/users/${userId}/photo`); }
 }
 
 const api = new ApiClient();

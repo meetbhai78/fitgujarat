@@ -2738,3 +2738,127 @@ body.light-theme .district-badge {
 #suspensionCountdown {
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
+
+/* ---- User Avatar System ---- */
+.user-avatar {
+  position: relative;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  background: linear-gradient(135deg, var(--bg-elevated), rgba(255,255,255,0.05));
+  border: 2px solid var(--border-light);
+  box-shadow: var(--shadow-sm);
+  transition: transform var(--transition-fast);
+}
+
+.user-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.user-avatar.sm  { width: 36px;  height: 36px;  font-size: 13px; }
+.user-avatar.md  { width: 48px;  height: 48px;  font-size: 16px; }
+.user-avatar.lg  { width: 72px;  height: 72px;  font-size: 24px; }
+.user-avatar.xl  { width: 96px;  height: 96px;  font-size: 32px; }
+
+/* Leaderboard top-3 avatar ring colors */
+.user-avatar.rank-1 { border-color: #FFC72C; box-shadow: 0 0 16px rgba(255,199,44,0.4); }
+.user-avatar.rank-2 { border-color: #9CA3AF; box-shadow: 0 0 12px rgba(156,163,175,0.3); }
+.user-avatar.rank-3 { border-color: #CD7F32; box-shadow: 0 0 12px rgba(205,127,50,0.3); }
+
+/* ---- Profile Edit Card ---- */
+.profile-edit-section {
+  background: var(--bg-glass-light);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  margin-top: var(--space-md);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.avatar-upload-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: var(--radius-full);
+  border: 1px dashed var(--border-light);
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  width: 100%;
+}
+
+.avatar-upload-btn:hover {
+  border-color: var(--primary);
+  color: var(--primary-light);
+  background: rgba(255,107,53,0.06);
+}
+
+/* ---- Report Button ---- */
+.report-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 10px;
+  border-radius: var(--radius-full);
+  border: 1px solid rgba(239,68,68,0.3);
+  background: transparent;
+  color: var(--danger);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  opacity: 0.7;
+}
+
+.report-btn:hover {
+  opacity: 1;
+  background: rgba(239,68,68,0.08);
+  border-color: var(--danger);
+}
+
+/* ---- Admin Reports Tab ---- */
+.report-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  transition: border-color var(--transition-fast);
+}
+
+.report-card:hover {
+  border-color: var(--danger);
+}
+
+.report-badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: var(--radius-full);
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.report-badge.fake_steps       { background: rgba(239,68,68,0.15);  color: var(--danger);  }
+.report-badge.inappropriate_content { background: rgba(245,158,11,0.15); color: var(--warning); }
+.report-badge.harassment       { background: rgba(239,68,68,0.15);  color: var(--danger);  }
+.report-badge.spam             { background: rgba(107,114,128,0.15);color: var(--text-secondary); }
+.report-badge.other            { background: rgba(59,130,246,0.15); color: var(--info);    }

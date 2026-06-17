@@ -1,5 +1,6 @@
 const express = require('express');
 const mongoose = require('mongoose');
+const { v2: cloudinary } = require('cloudinary');
 const auth = require('../middleware/auth');
 const roleGuard = require('../middleware/roleGuard');
 const FraudFlag = require('../models/FraudFlag');
@@ -7,7 +8,14 @@ const ActivityLog = require('../models/ActivityLog');
 const User = require('../models/User');
 const WinnerPost = require('../models/WinnerPost');
 const UserStreak = require('../models/UserStreak');
+const UserReport = require('../models/UserReport');
 const { generateWinners } = require('../services/winnerService');
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key:    process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET
+});
 
 const router = express.Router();
 
@@ -475,6 +483,83 @@ router.get('/stats', auth, roleGuard('state_admin'), async (req, res) => {
       FraudFlag.countDocuments({ status: 'pending' })
     ]);
     res.json({ userCount, winnerCount, pendingCount, flagCount });
+  } catch (error) {
+    res.status(500).json({ error: 'Server error.' });
+  }
+});
+
+// ─── User Reports ──────────────────────────────────────────────────────────
+
+/**
+ * GET /api/admin/reports
+ * Get all user reports (with reporter and reported user info)
+ */
+router.get('/reports', auth, roleGuard('state_admin'), async (req, res) => {
+  try {
+    const { status = 'pending' } = req.query;
+    const filter = status === 'all' ? {} : { status };
+    const reports = await UserReport.find(filter)
+      .populate('reporter_id', 'name email district profile_photo_url')
+      .populate('reported_id',  'name email district profile_photo_url')
+      .populate('reviewed_by', 'name')
+      .sort({ created_at: -1 })
+      .limit(200);
+    res.json({ reports });
+  } catch (error) {
+    console.error('Admin reports error:', error);
+    res.status(500).json({ error: 'Server error.' });
+  }
+});
+
+/**
+ * POST /api/admin/reports/:id/dismiss
+ * Dismiss a user report
+ */
+router.post('/reports/:id/dismiss', auth, roleGuard('state_admin'), async (req, res) => {
+  try {
+    const report = await UserReport.findByIdAndUpdate(req.params.id, {
+      status: 'dismissed',
+      reviewed_by: req.userId,
+      reviewed_at: new Date()
+    }, { new: true });
+    if (!report) return res.status(404).json({ error: 'Report not found.' });
+    res.json({ message: 'Report dismissed.', report });
+  } catch (error) {
+    res.status(500).json({ error: 'Server error.' });
+  }
+});
+
+/**
+ * POST /api/admin/reports/:id/action
+ * Take action on a report (mark as reviewed)
+ */
+router.post('/reports/:id/action', auth, roleGuard('state_admin'), async (req, res) => {
+  try {
+    const report = await UserReport.findByIdAndUpdate(req.params.id, {
+      status: 'reviewed',
+      reviewed_by: req.userId,
+      reviewed_at: new Date()
+    }, { new: true });
+    if (!report) return res.status(404).json({ error: 'Report not found.' });
+    res.json({ message: 'Report marked as reviewed.', report });
+  } catch (error) {
+    res.status(500).json({ error: 'Server error.' });
+  }
+});
+
+/**
+ * DELETE /api/admin/users/:id/photo
+ * Admin removes a user's profile photo
+ */
+router.delete('/users/:id/photo', auth, roleGuard('state_admin'), async (req, res) => {
+  try {
+    const user = await User.findByIdAndUpdate(
+      req.params.id,
+      { profile_photo_url: '' },
+      { new: true }
+    ).select('-password_hash');
+    if (!user) return res.status(404).json({ error: 'User not found.' });
+    res.json({ message: `Profile photo removed for ${user.name}.`, user });
   } catch (error) {
     res.status(500).json({ error: 'Server error.' });
   }
