@@ -28,6 +28,12 @@ class ApiClient {
 
     try {
       const response = await fetch(`${API_BASE}${path}`, options);
+      
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        throw new Error(`Server returned non-JSON response (HTTP ${response.status}). Please check if your backend server is running.`);
+      }
+
       const json = await response.json();
 
       if (!response.ok) {
@@ -55,6 +61,12 @@ class ApiClient {
         headers,
         body: formData
       });
+      
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        throw new Error(`Server returned non-JSON response (HTTP ${response.status}).`);
+      }
+
       const json = await response.json();
       if (!response.ok) throw new Error(json.error || `HTTP ${response.status}`);
       return json;
