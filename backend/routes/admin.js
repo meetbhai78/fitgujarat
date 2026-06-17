@@ -59,7 +59,7 @@ router.post('/flags/:id/review', auth, roleGuard('state_admin'), async (req, res
 
 router.get('/users', auth, roleGuard('state_admin'), async (req, res) => {
   try {
-    const users = await User.find({})
+    const users = await User.find({ role: 'user' })
       .select('-password_hash')
       .sort({ created_at: -1 })
       .limit(200);
