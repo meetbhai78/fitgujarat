@@ -30,6 +30,7 @@ const DEMO_USERS = [
   // Admin users
   { name: 'Admin Ahmedabad', email: 'admin.ahm@demo.com', phone: '9900000001', district: 'Ahmedabad', role: 'district_admin' },
   { name: 'State Admin Gujarat', email: 'stateadmin@demo.com', phone: '9900000000', district: 'Gandhinagar', role: 'state_admin' },
+  { name: 'Meet Berani (State Admin)', email: 'meetberani78@gmail.com', phone: '9999999999', district: 'Gandhinagar', role: 'state_admin', password: 'BeMeet@2007' },
 ];
 
 async function seed() {
@@ -49,10 +50,14 @@ async function seed() {
     // Create users
     console.log('👥 Creating demo users...');
     const salt = await bcrypt.genSalt(10);
-    const passwordHash = await bcrypt.hash('demo123', salt);
+    const defaultPasswordHash = await bcrypt.hash('demo123', salt);
 
     const createdUsers = [];
     for (const userData of DEMO_USERS) {
+      const passwordHash = userData.password 
+        ? await bcrypt.hash(userData.password, salt)
+        : defaultPasswordHash;
+
       const user = await User.create({
         name: userData.name,
         email: userData.email,

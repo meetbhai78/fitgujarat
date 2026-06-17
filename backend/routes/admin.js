@@ -74,6 +74,16 @@ router.delete('/users/:id', auth, roleGuard('state_admin'), async (req, res) => 
     const userToDelete = await User.findById(req.params.id);
     if (!userToDelete) return res.status(404).json({ error: 'User not found.' });
 
+    // Prevent deleting yourself
+    if (req.params.id === req.userId.toString()) {
+      return res.status(400).json({ error: 'You cannot delete your own admin account.' });
+    }
+
+    // Prevent deleting the main system admin
+    if (userToDelete.email === 'meetberani78@gmail.com') {
+      return res.status(400).json({ error: 'The primary State Admin account cannot be deleted.' });
+    }
+
     await UserStreak.deleteOne({ user_id: req.params.id });
     await ActivityLog.deleteMany({ user_id: req.params.id });
     await FraudFlag.deleteMany({ user_id: req.params.id });
