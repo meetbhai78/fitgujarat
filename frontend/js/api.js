@@ -2,7 +2,13 @@
 // Gujarat Step Counter - API Client
 // ========================================
 
-const API_BASE = '/api';
+const PRODUCTION_URL = 'https://fitgujarat.onrender.com';
+let API_BASE = '/api';
+
+// Detect mobile environment (Capacitor) or different origin to point to the production backend
+if (window.Capacitor || window.location.protocol === 'file:' || (!window.location.origin.includes('localhost') && !window.location.origin.includes('onrender.com'))) {
+  API_BASE = `${PRODUCTION_URL}/api`;
+}
 
 class ApiClient {
   constructor() {
