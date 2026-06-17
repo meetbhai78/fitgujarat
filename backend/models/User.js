@@ -13,7 +13,8 @@ const userSchema = new mongoose.Schema({
   district_locked: { type: Boolean, default: false },
   preferred_language: { type: String, enum: ['en', 'gu'], default: 'en' },
   created_at: { type: Date, default: Date.now },
-  frozen_until: { type: Date, default: null }
+  frozen_until: { type: Date, default: null },
+  is_hidden: { type: Boolean, default: false }
 });
 
 // Ensure at least email or phone is provided

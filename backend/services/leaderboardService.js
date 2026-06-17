@@ -26,10 +26,10 @@ async function computeOverallLeaderboard(district, cycleStart, cycleEnd) {
   const startDate = formatDate(cycleStart);
   const endDate = formatDate(cycleEnd);
 
-  // Build user filter (only count regular users)
+  // Build user filter (only count regular users who are not hidden)
   const users = district !== 'STATE'
-    ? await User.find({ district, role: 'user' }).select('_id')
-    : await User.find({ role: 'user' }).select('_id');
+    ? await User.find({ district, role: 'user', is_hidden: { $ne: true } }).select('_id')
+    : await User.find({ role: 'user', is_hidden: { $ne: true } }).select('_id');
   const userIds = users.map(u => u._id);
   const userFilter = { user_id: { $in: userIds } };
 
@@ -72,9 +72,9 @@ async function computeOverallLeaderboard(district, cycleStart, cycleEnd) {
  * Current consecutive-day streak length (never resets per cycle)
  */
 async function computeStreakLeaderboard(district, cycleStart, cycleEnd) {
-  let userFilter = {};
+  let userFilter = { is_hidden: { $ne: true } };
   if (district !== 'STATE') {
-    userFilter = { district };
+    userFilter.district = district;
   }
 
   const users = await User.find(userFilter).select('_id');
@@ -104,10 +104,10 @@ async function computeStreakLeaderboard(district, cycleStart, cycleEnd) {
  * Highest single-day score ever achieved
  */
 async function computePeakDayLeaderboard(district, cycleStart, cycleEnd) {
-  // Build user filter (only count regular users)
+  // Build user filter (only count regular users who are not hidden)
   const users = district !== 'STATE'
-    ? await User.find({ district, role: 'user' }).select('_id')
-    : await User.find({ role: 'user' }).select('_id');
+    ? await User.find({ district, role: 'user', is_hidden: { $ne: true } }).select('_id')
+    : await User.find({ role: 'user', is_hidden: { $ne: true } }).select('_id');
   const userIds = users.map(u => u._id);
   const userFilter = { user_id: { $in: userIds } };
 

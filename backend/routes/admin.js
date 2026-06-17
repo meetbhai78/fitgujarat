@@ -232,6 +232,44 @@ router.post('/users/:id/unfreeze', auth, roleGuard('state_admin'), async (req, r
   }
 });
 
+/**
+ * POST /api/admin/users/:id/hide
+ * Hide a user (ghost mode)
+ */
+router.post('/users/:id/hide', auth, roleGuard('state_admin'), async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user) return res.status(404).json({ error: 'User not found.' });
+
+    user.is_hidden = true;
+    await user.save();
+
+    res.json({ message: `User ${user.name} is now hidden.` });
+  } catch (error) {
+    console.error('Hide user error:', error);
+    res.status(500).json({ error: 'Server error during user hide.' });
+  }
+});
+
+/**
+ * POST /api/admin/users/:id/unhide
+ * Unhide a user
+ */
+router.post('/users/:id/unhide', auth, roleGuard('state_admin'), async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user) return res.status(404).json({ error: 'User not found.' });
+
+    user.is_hidden = false;
+    await user.save();
+
+    res.json({ message: `User ${user.name} is no longer hidden.` });
+  } catch (error) {
+    console.error('Unhide user error:', error);
+    res.status(500).json({ error: 'Server error during user unhide.' });
+  }
+});
+
 // ─── Winner post management ────────────────────────────────────────────────
 
 /**

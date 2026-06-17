@@ -2164,6 +2164,12 @@ function renderFilteredAdminUsers(users) {
                      </div>` 
                   : ''
                 }
+                ${u.is_hidden
+                  ? `<div style="margin-top:4px; padding:4px 8px; background:rgba(107, 114, 128, 0.1); border:1px solid rgba(107, 114, 128, 0.3); border-radius:6px; color:var(--text-secondary); font-size:11px; font-weight:600; display:inline-flex; align-items:center; gap:4px;">
+                      👻 Hidden (Ghost Mode)
+                     </div>`
+                  : ''
+                }
               </div>
             </div>
             
@@ -2181,6 +2187,14 @@ function renderFilteredAdminUsers(users) {
                    </button>`
                 : `<button class="btn btn-sm" style="background:rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.25); color:var(--warning); font-weight:600; padding:6px 12px; border-radius:8px; font-size:12px;" onclick="promptFreezeUser('${u._id}', '${(u.name || '').replace(/'/g, "\\'")}')">
                     ❄️ Freeze
+                   </button>`
+              }
+              ${u.is_hidden
+                ? `<button class="btn btn-sm" style="background:rgba(107, 114, 128, 0.1); border: 1px solid rgba(107, 114, 128, 0.3); color:var(--text-secondary); font-weight:600; padding:6px 12px; border-radius:8px; font-size:12px;" onclick="handleUnhideUser('${u._id}', '${(u.name || '').replace(/'/g, "\\'")}')">
+                    👁️ Unhide
+                   </button>`
+                : `<button class="btn btn-sm" style="background:rgba(55, 65, 81, 0.2); border: 1px solid rgba(107, 114, 128, 0.3); color:var(--text-muted); font-weight:600; padding:6px 12px; border-radius:8px; font-size:12px;" onclick="handleHideUser('${u._id}', '${(u.name || '').replace(/'/g, "\\'")}')">
+                    👻 Hide
                    </button>`
               }
               ${u.profile_photo_url ? `<button class="btn btn-sm" style="background:rgba(156,163,175,0.1); border:1px solid rgba(156,163,175,0.3); color:var(--text-secondary); font-weight:600; padding:6px 12px; border-radius:8px; font-size:12px;" onclick="handleAdminRemoveUserPhoto('${u._id}','${(u.name||'').replace(/'/g,"\\'")}')">🖼️ Remove Photo</button>` : ''}
@@ -2666,6 +2680,28 @@ async function handleUnfreezeUser(userId, userName) {
     }
   } catch (error) {
     showToast(error.message || 'Failed to unfreeze user.', 'error');
+  }
+}
+
+async function handleHideUser(userId, userName) {
+  if (!confirm(`Are you sure you want to hide ${userName}? They will be removed from leaderboards and winner feeds.`)) return;
+  try {
+    await api.hideUser(userId);
+    showToast(`👻 ${userName} is now hidden.`, 'success');
+    if (adminSubView === 'users') loadAdminUsers();
+  } catch (error) {
+    showToast(error.message || 'Failed to hide user.', 'error');
+  }
+}
+
+async function handleUnhideUser(userId, userName) {
+  if (!confirm(`Are you sure you want to unhide ${userName}? They will be visible again.`)) return;
+  try {
+    await api.unhideUser(userId);
+    showToast(`👁️ ${userName} is no longer hidden.`, 'success');
+    if (adminSubView === 'users') loadAdminUsers();
+  } catch (error) {
+    showToast(error.message || 'Failed to unhide user.', 'error');
   }
 }
 

@@ -134,6 +134,8 @@ class ApiClient {
   async resetUserPassword(userId, newPassword) { return this.request('POST', `/admin/users/${userId}/reset-password`, { newPassword }); }
   async freezeUser(userId, frozenUntil) { return this.request('POST', `/admin/users/${userId}/freeze`, { frozenUntil }); }
   async unfreezeUser(userId) { return this.request('POST', `/admin/users/${userId}/unfreeze`); }
+  async hideUser(userId) { return this.request('POST', `/admin/users/${userId}/hide`); }
+  async unhideUser(userId) { return this.request('POST', `/admin/users/${userId}/unhide`); }
 
   /** Get winner posts filtered by approval status (pending | approved | rejected | all) */
   async getAdminWinnerPosts(status = 'all') {
