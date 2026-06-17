@@ -7,6 +7,8 @@ let aiChatHistory = [];
 let leaderboardSubView = 'standings';
 let adminSubView = 'dashboard';
 let allAdminUsers = [];
+let allAdminWinners = [];
+let allFraudFlags = [];
 
 // ---- Router ----
 function navigate(page) {
@@ -1430,9 +1432,17 @@ async function renderAdminTabContent() {
       <div class="card">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:12px;">
           <div class="section-title" style="margin-bottom:0;"><span class="title-icon">👥</span> ${t('users')}</div>
-          <div style="position:relative; width:100%; max-width:300px;">
-            <input type="text" id="adminUserSearchInput" class="form-input" placeholder="🔍 Search by name, phone, email, district..." style="padding: 10px 36px 10px 12px; font-size: 13px; border-radius: 10px; background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); color: var(--text-primary); outline: none; width:100%;" oninput="filterAdminUsersList()">
-            <span id="searchClearBtn" style="position:absolute; right:12px; top:50%; transform:translateY(-50%); cursor:pointer; color:var(--text-muted); display:none; font-size:14px;" onclick="clearAdminSearch()">✕</span>
+          <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap; width:100%; max-width:500px; justify-content:flex-end;">
+            <select id="adminUserSortSelect" class="form-input" style="padding: 8px 12px; font-size: 12px; border-radius: 10px; background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); color: var(--text-primary); outline: none; width:auto; cursor:pointer;" onchange="filterAdminUsersList()">
+              <option value="newest">📅 Newest Registered</option>
+              <option value="name_asc">🔤 Name (A-Z)</option>
+              <option value="name_desc">🔤 Name (Z-A)</option>
+              <option value="district_asc">📍 District (A-Z)</option>
+            </select>
+            <div style="position:relative; flex:1; min-width:180px;">
+              <input type="text" id="adminUserSearchInput" class="form-input" placeholder="🔍 Search by name, phone, email, district..." style="padding: 10px 36px 10px 12px; font-size: 13px; border-radius: 10px; background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); color: var(--text-primary); outline: none; width:100%;" oninput="filterAdminUsersList()">
+              <span id="searchClearBtn" style="position:absolute; right:12px; top:50%; transform:translateY(-50%); cursor:pointer; color:var(--text-muted); display:none; font-size:14px;" onclick="clearAdminSearch()">✕</span>
+            </div>
           </div>
         </div>
         <div id="adminUsersList" class="loading-spinner"><div class="spinner"></div></div>
@@ -1693,37 +1703,78 @@ async function triggerManualWinners(mode) {
 }
 
 async function loadFraudFlags() {
+  const container = document.getElementById('fraudFlagsList');
+  if (!container) return;
+
+  container.classList.add('loading-spinner');
+  container.innerHTML = '<div class="spinner"></div>';
+
   try {
     const data = await api.getFraudFlags();
-    const container = document.getElementById('fraudFlagsList');
-    if (container) container.classList.remove('loading-spinner');
-    
-    if (!data.flags || data.flags.length === 0) {
-      container.innerHTML = `<div class="empty-state"><div class="empty-icon">✅</div><div class="empty-text">${t('noData')}</div></div>`;
-      return;
-    }
-
-    container.innerHTML = data.flags.map(flag => `
-      <div class="rank-item" style="margin-bottom:8px; flex-wrap:wrap; display:flex; justify-content:space-between; align-items:center;">
-        <div style="flex:1; min-width:200px;">
-          <div class="rank-name">${flag.user_id?.name || 'User'}</div>
-          <div class="rank-district">${flag.reason}</div>
-          <div style="font-size:11px; color:var(--text-muted); margin-top:4px;">
-            ${flag.activity_log_id?.date || ''} | ${flag.activity_log_id?.raw_value?.toLocaleString() || 0} ${t('steps')}
-          </div>
-        </div>
-        <div style="display:flex; gap:8px; align-items:center;">
-          <button class="btn btn-sm btn-success" onclick="handleFlagReview('${flag._id}', 'approved')">✅ ${t('approve')}</button>
-          <button class="btn btn-sm" style="background:var(--danger); color:white;" onclick="handleFlagReview('${flag._id}', 'rejected')">❌ ${t('reject')}</button>
-          <button class="btn btn-sm" style="background:var(--warning); color:white; font-weight:600;" onclick="promptFreezeUser('${flag.user_id?._id}', '${flag.user_id?.name?.replace(/'/g, "\\'")}')">❄️ Freeze</button>
-        </div>
-      </div>
-    `).join('');
+    allFraudFlags = data.flags || [];
+    container.classList.remove('loading-spinner');
+    sortAndRenderFraudFlags();
   } catch (error) {
     console.error('Fraud flags error:', error);
-    const container = document.getElementById('fraudFlagsList');
-    if (container) container.classList.remove('loading-spinner');
+    if (container) {
+      container.classList.remove('loading-spinner');
+      container.innerHTML = `<p class="text-muted" style="text-align:center;">Failed to load fraud flags.</p>`;
+    }
   }
+}
+
+function sortAndRenderFraudFlags() {
+  const container = document.getElementById('fraudFlagsList');
+  if (!container) return;
+
+  const sortSelect = document.getElementById('adminFlagSortSelect');
+  const sortBy = sortSelect ? sortSelect.value : 'newest';
+
+  const sortHeaderHtml = `
+    <div style="display:flex; justify-content:flex-end; margin-bottom:12px;">
+      <select id="adminFlagSortSelect" class="form-input" style="padding: 8px 12px; font-size: 12px; border-radius: 10px; background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); color: var(--text-primary); outline: none; width:auto; cursor:pointer;" onchange="sortAndRenderFraudFlags()">
+        <option value="newest" ${sortBy === 'newest' ? 'selected' : ''}>📅 Newest First</option>
+        <option value="steps_desc" ${sortBy === 'steps_desc' ? 'selected' : ''}>🏃 Steps (Highest)</option>
+        <option value="name_asc" ${sortBy === 'name_asc' ? 'selected' : ''}>🔤 User Name (A-Z)</option>
+      </select>
+    </div>
+  `;
+
+  if (allFraudFlags.length === 0) {
+    container.innerHTML = `<div class="empty-state"><div class="empty-icon">✅</div><div class="empty-text">${t('noData')}</div></div>`;
+    return;
+  }
+
+  // Sort flags
+  const sorted = [...allFraudFlags];
+  if (sortBy === 'steps_desc') {
+    sorted.sort((a, b) => (b.activity_log_id?.raw_value || 0) - (a.activity_log_id?.raw_value || 0));
+  } else if (sortBy === 'name_asc') {
+    sorted.sort((a, b) => (a.user_id?.name || '').localeCompare(b.user_id?.name || ''));
+  } else if (sortBy === 'newest') {
+    sorted.sort((a, b) => new Date(b.created_at || b.reviewed_at || 0) - new Date(a.created_at || a.reviewed_at || 0));
+  }
+
+  container.innerHTML = sortHeaderHtml + `
+    <div style="display:flex; flex-direction:column; gap:10px;">
+      ${sorted.map(flag => `
+        <div class="rank-item" style="margin-bottom:0; flex-wrap:wrap; display:flex; justify-content:space-between; align-items:center;">
+          <div style="flex:1; min-width:200px;">
+            <div class="rank-name">${flag.user_id?.name || 'User'}</div>
+            <div class="rank-district">${flag.reason}</div>
+            <div style="font-size:11px; color:var(--text-muted); margin-top:4px;">
+              ${flag.activity_log_id?.date || ''} | ${flag.activity_log_id?.raw_value?.toLocaleString() || 0} ${t('steps')}
+            </div>
+          </div>
+          <div style="display:flex; gap:8px; align-items:center;">
+            <button class="btn btn-sm btn-success" onclick="handleFlagReview('${flag._id}', 'approved')">✅ ${t('approve')}</button>
+            <button class="btn btn-sm" style="background:var(--danger); color:white;" onclick="handleFlagReview('${flag._id}', 'rejected')">❌ ${t('reject')}</button>
+            <button class="btn btn-sm" style="background:var(--warning); color:white; font-weight:600;" onclick="promptFreezeUser('${flag.user_id?._id}', '${flag.user_id?.name?.replace(/'/g, "\\'")}')">❄️ Freeze</button>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+  `;
 }
 
 async function handleFlagReview(flagId, action) {
@@ -1774,26 +1825,38 @@ function clearAdminSearch() {
 function filterAdminUsersList() {
   const input = document.getElementById('adminUserSearchInput');
   const clearBtn = document.getElementById('searchClearBtn');
+  const sortSelect = document.getElementById('adminUserSortSelect');
   if (!input) return;
   const query = input.value.trim().toLowerCase();
   if (clearBtn) clearBtn.style.display = query ? 'block' : 'none';
 
-  if (!query) {
-    renderFilteredAdminUsers(allAdminUsers);
-    return;
+  let filtered = allAdminUsers;
+  if (query) {
+    filtered = allAdminUsers.filter(u => {
+      const name = (u.name || '').toLowerCase();
+      const email = (u.email || '').toLowerCase();
+      const phone = (u.phone || '').toLowerCase();
+      const district = (u.district || '').toLowerCase();
+      const districtName = (getDistrictName(u.district) || '').toLowerCase();
+      const role = (u.role || '').toLowerCase();
+      return name.includes(query) || email.includes(query) || phone.includes(query) || district.includes(query) || districtName.includes(query) || role.includes(query);
+    });
   }
 
-  const filtered = allAdminUsers.filter(u => {
-    const name = (u.name || '').toLowerCase();
-    const email = (u.email || '').toLowerCase();
-    const phone = (u.phone || '').toLowerCase();
-    const district = (u.district || '').toLowerCase();
-    const districtName = (getDistrictName(u.district) || '').toLowerCase();
-    const role = (u.role || '').toLowerCase();
-    return name.includes(query) || email.includes(query) || phone.includes(query) || district.includes(query) || districtName.includes(query) || role.includes(query);
-  });
+  // Apply sorting
+  const sortBy = sortSelect ? sortSelect.value : 'newest';
+  const sorted = [...filtered];
+  if (sortBy === 'name_asc') {
+    sorted.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+  } else if (sortBy === 'name_desc') {
+    sorted.sort((a, b) => (b.name || '').localeCompare(a.name || ''));
+  } else if (sortBy === 'district_asc') {
+    sorted.sort((a, b) => (getDistrictName(a.district) || '').localeCompare(getDistrictName(b.district) || ''));
+  } else if (sortBy === 'newest') {
+    sorted.sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
+  }
 
-  renderFilteredAdminUsers(filtered);
+  renderFilteredAdminUsers(sorted);
 }
 
 function getInitials(name) {
@@ -2300,94 +2363,129 @@ async function loadAdminWinners(statusFilter) {
 
   try {
     const data = await api.getAdminWinnerPosts(adminWinnersFilter);
+    allAdminWinners = data.posts || [];
     container.classList.remove('loading-spinner');
 
     if (document.getElementById('adminStatWinnersCount')) {
-      document.getElementById('adminStatWinnersCount').textContent = data.posts ? data.posts.length : 0;
+      document.getElementById('adminStatWinnersCount').textContent = allAdminWinners.length;
     }
 
-    // Sub-tab filter buttons
-    const filterHtml = `
-      <div style="display:flex; gap:8px; margin-bottom:16px; flex-wrap:wrap;">
+    sortAndRenderAdminWinners();
+  } catch (error) {
+    console.error('Failed to load admin winner posts:', error);
+    if (container) {
+      container.classList.remove('loading-spinner');
+      container.innerHTML = `<p class="text-muted" style="text-align:center;">Failed to load winner posts.</p>`;
+    }
+  }
+}
+
+function sortAndRenderAdminWinners() {
+  const container = document.getElementById('adminWinnersList');
+  if (!container) return;
+
+  const sortSelect = document.getElementById('adminWinnerSortSelect');
+  const sortBy = sortSelect ? sortSelect.value : 'newest';
+
+  // Sub-tab filter buttons
+  const filterHtml = `
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:12px;">
+      <div style="display:flex; gap:8px; flex-wrap:wrap;">
         ${[['pending','⏳ Pending','var(--warning)'],['approved','✅ Approved','var(--secondary)'],['rejected','❌ Rejected','var(--danger)'],['all','📋 All','var(--text-secondary)']].map(([val, label, clr]) =>
           `<button onclick="loadAdminWinners('${val}')" style="padding:6px 14px; border-radius:20px; border:1px solid ${clr}; background:${adminWinnersFilter===val ? clr : 'transparent'}; color:${adminWinnersFilter===val ? 'white' : clr}; font-size:12px; font-weight:700; cursor:pointer; transition:all 0.2s;">${label}</button>`
         ).join('')}
       </div>
-    `;
+      <select id="adminWinnerSortSelect" class="form-input" style="padding: 8px 12px; font-size: 12px; border-radius: 10px; background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); color: var(--text-primary); outline: none; width:auto; cursor:pointer;" onchange="sortAndRenderAdminWinners()">
+        <option value="newest" ${sortBy === 'newest' ? 'selected' : ''}>📅 Newest First</option>
+        <option value="score_desc" ${sortBy === 'score_desc' ? 'selected' : ''}>🏅 Score (Highest)</option>
+        <option value="name_asc" ${sortBy === 'name_asc' ? 'selected' : ''}>🔤 Name (A-Z)</option>
+      </select>
+    </div>
+  `;
 
-    if (!data.posts || data.posts.length === 0) {
-      container.innerHTML = filterHtml + `<div class="empty-state"><div class="empty-icon">🏆</div><div class="empty-text">No posts in this category</div></div>`;
-      return;
-    }
+  if (allAdminWinners.length === 0) {
+    container.innerHTML = filterHtml + `<div class="empty-state"><div class="empty-icon">🏆</div><div class="empty-text">No posts in this category</div></div>`;
+    return;
+  }
 
-    container.innerHTML = filterHtml + `
-      <div style="display:flex; flex-direction:column; gap:16px;">
-        ${data.posts.map(p => {
-          const categoryMeta = getCategoryLabel(p.category);
-          const freq = p.frequency || 'monthly';
-          const statusColor = p.approval_status === 'approved' ? 'var(--secondary)' : p.approval_status === 'rejected' ? 'var(--danger)' : 'var(--warning)';
-          const statusEmoji = p.approval_status === 'approved' ? '✅' : p.approval_status === 'rejected' ? '❌' : '⏳';
+  // Sort posts
+  const sorted = [...allAdminWinners];
+  if (sortBy === 'score_desc') {
+    sorted.sort((a, b) => (b.value || 0) - (a.value || 0));
+  } else if (sortBy === 'name_asc') {
+    sorted.sort((a, b) => (a.user_id?.name || '').localeCompare(b.user_id?.name || ''));
+  } else if (sortBy === 'newest') {
+    sorted.sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
+  }
 
-          const cycleStart = p.cycle_start ? new Date(p.cycle_start) : null;
-          let cycleLabel = '';
-          if (freq === 'weekly' && cycleStart) {
-            const weekEnd = new Date(cycleStart);
-            weekEnd.setDate(cycleStart.getDate() + 6);
-            cycleLabel = `Week of ${cycleStart.toLocaleDateString('en-IN', {day:'numeric',month:'short'})}–${weekEnd.toLocaleDateString('en-IN', {day:'numeric',month:'short'})}`;
-          } else if (cycleStart) {
-            cycleLabel = cycleStart.toLocaleDateString('en-IN', { month:'long', year:'numeric' });
-          }
+  container.innerHTML = filterHtml + `
+    <div style="display:flex; flex-direction:column; gap:16px;">
+      ${sorted.map(p => {
+        const categoryMeta = getCategoryLabel(p.category);
+        const freq = p.frequency || 'monthly';
+        const statusColor = p.approval_status === 'approved' ? 'var(--secondary)' : p.approval_status === 'rejected' ? 'var(--danger)' : 'var(--warning)';
+        const statusEmoji = p.approval_status === 'approved' ? '✅' : p.approval_status === 'rejected' ? '❌' : '⏳';
 
-          // Media preview
-          let mediaPrev = '';
-          if (p.media_type === 'image' && p.media_url) {
-            mediaPrev = `<img src="${p.media_url}" style="width:100%; max-height:200px; object-fit:cover; border-radius:12px; margin:10px 0; border: 1px solid var(--border-color);" onerror="this.style.display='none'">`;
-          } else if (p.media_type === 'audio' && p.media_url) {
-            mediaPrev = `<audio controls style="width:100%; margin:10px 0; border-radius: 8px;"><source src="${p.media_url}"></audio>`;
-          } else {
-            mediaPrev = `<div style="font-size:11px; color:var(--text-muted); margin:6px 0; font-style:italic;">📭 No media uploaded</div>`;
-          }
+        const cycleStart = p.cycle_start ? new Date(p.cycle_start) : null;
+        let cycleLabel = '';
+        if (freq === 'weekly' && cycleStart) {
+          const weekEnd = new Date(cycleStart);
+          weekEnd.setDate(cycleStart.getDate() + 6);
+          cycleLabel = `Week of ${cycleStart.toLocaleDateString('en-IN', {day:'numeric',month:'short'})}–${weekEnd.toLocaleDateString('en-IN', {day:'numeric',month:'short'})}`;
+        } else if (cycleStart) {
+          cycleLabel = cycleStart.toLocaleDateString('en-IN', { month:'long', year:'numeric' });
+        }
 
-          return `
-            <div class="card" style="margin-bottom:0; padding:16px; border: 1px solid var(--border-color); position:relative; display:flex; flex-direction:column; gap:8px;">
-              <!-- Status badge -->
-              <div style="position:absolute; top:16px; right:16px; font-size:10px; font-weight:700; color:${statusColor}; background:${statusColor}20; padding:3px 10px; border-radius:20px; border:1px solid ${statusColor};">${statusEmoji} ${p.approval_status.toUpperCase()}</div>
+        // Media preview
+        let mediaPrev = '';
+        if (p.media_type === 'image' && p.media_url) {
+          mediaPrev = `<img src="${p.media_url}" style="width:100%; max-height:200px; object-fit:cover; border-radius:12px; margin:10px 0; border: 1px solid var(--border-color);" onerror="this.style.display='none'">`;
+        } else if (p.media_type === 'audio' && p.media_url) {
+          mediaPrev = `<audio controls style="width:100%; margin:10px 0; border-radius: 8px;"><source src="${p.media_url}"></audio>`;
+        } else {
+          mediaPrev = `<div style="font-size:11px; color:var(--text-muted); margin:6px 0; font-style:italic;">📭 No media uploaded</div>`;
+        }
 
-              <!-- User info -->
-              <div style="display:flex; align-items:center; gap:12px; margin-bottom:4px;">
-                <div style="width:40px; height:40px; border-radius:50%; background: linear-gradient(135deg, var(--bg-elevated) 0%, rgba(255,255,255,0.03) 100%); border: 1.5px solid var(--border-light); display:flex; align-items:center; justify-content:center; font-weight:800; color:var(--text-primary); font-size:14px; box-shadow: var(--shadow-sm); flex-shrink:0;">
-                  ${getInitials(p.user_id?.name || '?')}
-                </div>
-                <div>
-                  <div style="font-weight:700; font-size:14px; color:var(--text-primary);">${p.user_id?.name || 'Unknown User'}</div>
-                  <div style="font-size:11px; color:var(--primary-light); font-weight:600; margin-top:2px;">
-                    ${categoryMeta.emoji} ${categoryMeta.text} · ${p.level === 'state' ? 'State Level' : (getDistrictName(p.district) || 'District Level')}
-                  </div>
-                </div>
+        return `
+          <div class="card" style="margin-bottom:0; padding:16px; border: 1px solid var(--border-color); position:relative; display:flex; flex-direction:column; gap:8px;">
+            <!-- Status badge -->
+            <div style="position:absolute; top:16px; right:16px; font-size:10px; font-weight:700; color:${statusColor}; background:${statusColor}20; padding:3px 10px; border-radius:20px; border:1px solid ${statusColor};">${statusEmoji} ${p.approval_status.toUpperCase()}</div>
+
+            <!-- User info -->
+            <div style="display:flex; align-items:center; gap:12px; margin-bottom:4px;">
+              <div style="width:40px; height:40px; border-radius:50%; background: linear-gradient(135deg, var(--bg-elevated) 0%, rgba(255,255,255,0.03) 100%); border: 1.5px solid var(--border-light); display:flex; align-items:center; justify-content:center; font-weight:800; color:var(--text-primary); font-size:14px; box-shadow: var(--shadow-sm); flex-shrink:0;">
+                ${getInitials(p.user_id?.name || '?')}
               </div>
-
-              <!-- Cycle Meta details -->
-              <div style="font-size:12px; color:var(--text-secondary); display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-top:4px;">
-                <span style="background:var(--bg-glass-light); padding:2px 8px; border-radius:6px; border:1px solid var(--border-color);">${freq === 'weekly' ? '📅 Weekly' : '🗓️ Monthly'}</span>
-                <span>🏅 <strong>${(p.value || 0).toLocaleString()}</strong> pts</span>
-                <span style="opacity:0.6;">· ${cycleLabel}</span>
-              </div>
-
-              ${mediaPrev}
-
-              ${p.caption ? `<div style="font-size:13px; color:var(--text-primary); margin:6px 0; padding:10px; background:var(--bg-glass-light); border-radius:8px; border-left:3px solid var(--primary);">${p.caption}</div>` : ''}
-
-              <!-- Action buttons -->
-              <div style="display:flex; gap:8px; margin-top:8px; flex-wrap:wrap; border-top: 1px solid rgba(255,255,255,0.04); padding-top:12px; justify-content:flex-end;">
-                ${p.approval_status !== 'approved' ? `<button class="btn btn-sm btn-success" onclick="handleApproveWinnerPost('${p._id}')" style="min-width:80px; padding:6px 14px; border-radius:8px; font-size:12px;">✅ Approve</button>` : ''}
-                ${p.approval_status !== 'rejected' ? `<button class="btn btn-sm" onclick="handleRejectWinnerPost('${p._id}')" style="min-width:80px; background:rgba(239,68,68,0.1); border:1px solid var(--danger); color:var(--danger); font-weight:600; padding:6px 14px; border-radius:8px; font-size:12px;">❌ Reject</button>` : ''}
-                <button class="btn btn-sm" onclick="handleDeleteWinnerPost('${p._id}')" style="background:rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.25); color:var(--danger); font-weight:600; padding:6px 14px; border-radius:8px; font-size:12px;">🗑️ Delete</button>
+              <div>
+                <div style="font-weight:700; font-size:14px; color:var(--text-primary);">${p.user_id?.name || 'Unknown User'}</div>
+                <div style="font-size:11px; color:var(--primary-light); font-weight:600; margin-top:2px;">
+                  ${categoryMeta.emoji} ${categoryMeta.text} · ${p.level === 'state' ? 'State Level' : (getDistrictName(p.district) || 'District Level')}
+                </div>
               </div>
             </div>
-          `;
-        }).join('')}
-      </div>
-    `;
+
+            <!-- Cycle Meta details -->
+            <div style="font-size:12px; color:var(--text-secondary); display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-top:4px;">
+              <span style="background:var(--bg-glass-light); padding:2px 8px; border-radius:6px; border:1px solid var(--border-color);">${freq === 'weekly' ? '📅 Weekly' : '🗓️ Monthly'}</span>
+              <span>🏅 <strong>${(p.value || 0).toLocaleString()}</strong> pts</span>
+              <span style="opacity:0.6;">· ${cycleLabel}</span>
+            </div>
+
+            ${mediaPrev}
+
+            ${p.caption ? `<div style="font-size:13px; color:var(--text-primary); margin:6px 0; padding:10px; background:var(--bg-glass-light); border-radius:8px; border-left:3px solid var(--primary);">${p.caption}</div>` : ''}
+
+            <!-- Action buttons -->
+            <div style="display:flex; gap:8px; margin-top:8px; flex-wrap:wrap; border-top: 1px solid rgba(255,255,255,0.04); padding-top:12px; justify-content:flex-end;">
+              ${p.approval_status !== 'approved' ? `<button class="btn btn-sm btn-success" onclick="handleApproveWinnerPost('${p._id}')" style="min-width:80px; padding:6px 14px; border-radius:8px; font-size:12px;">✅ Approve</button>` : ''}
+              ${p.approval_status !== 'rejected' ? `<button class="btn btn-sm" onclick="handleRejectWinnerPost('${p._id}')" style="min-width:80px; background:rgba(239,68,68,0.1); border:1px solid var(--danger); color:var(--danger); font-weight:600; padding:6px 14px; border-radius:8px; font-size:12px;">❌ Reject</button>` : ''}
+              <button class="btn btn-sm" onclick="handleDeleteWinnerPost('${p._id}')" style="background:rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.25); color:var(--danger); font-weight:600; padding:6px 14px; border-radius:8px; font-size:12px;">🗑️ Delete</button>
+            </div>
+          </div>
+        `;
+      }).join('')}
+    </div>
+  `;
   } catch (error) {
     console.error('Failed to load admin winner posts:', error);
     if (container) {
