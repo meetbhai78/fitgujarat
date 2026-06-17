@@ -28,7 +28,29 @@ function initCronJobs() {
     }
   });
 
-  // 2. Monthly winner generation (1st of each month at midnight)
+  // 2. Weekly district winner generation (every Monday at midnight)
+  cron.schedule('0 0 * * 1', async () => {
+    global.cronTracker.lastWinnerGeneration = new Date();
+    console.log('⏰ [CRON] Generating weekly district winners...');
+    try {
+      const now = new Date();
+      // Previous week: Monday to Sunday
+      const prevMonday = new Date(now);
+      prevMonday.setDate(now.getDate() - now.getDay() - 6);
+      prevMonday.setHours(0, 0, 0, 0);
+      const prevSunday = new Date(prevMonday);
+      prevSunday.setDate(prevMonday.getDate() + 6);
+      prevSunday.setHours(23, 59, 59, 999);
+
+      console.log(`⏰ [CRON] Weekly period: ${prevMonday.toISOString()} to ${prevSunday.toISOString()}`);
+      const winners = await generateWinners(prevMonday, prevSunday, 'district');
+      console.log(`✅ [CRON] Generated ${winners.length} weekly district winner posts.`);
+    } catch (error) {
+      console.error('❌ [CRON] Weekly winner generation error:', error);
+    }
+  });
+
+  // 3. Monthly state winner generation (1st of each month at midnight)
   cron.schedule('0 0 1 * *', async () => {
     global.cronTracker.lastWinnerGeneration = new Date();
     console.log('⏰ [CRON] Generating monthly winners...');
