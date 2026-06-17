@@ -1761,7 +1761,13 @@ async function loadAdminUsers() {
                 <span class="badge" style="font-size:10px; padding:2px 6px; background:var(--bg-glass-light); border:1px solid var(--border-light); margin-top:4px; display:inline-block; border-radius:4px; color:var(--text-primary);">
                   ${u.role}
                 </span>
-               <div style="display:flex; gap:8px; align-items:center;">
+               <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+                 <button class="btn btn-sm" style="background:var(--primary); color:white; font-weight:600; padding:6px 12px; border-radius:var(--radius-sm); font-size:12px;" onclick="promptEditUser('${u._id}', '${u.name.replace(/'/g, "\\'")}', '${(u.email||'').replace(/'/g, "\\'")}', '${(u.phone||'').replace(/'/g, "\\'")}', '${u.district}', '${u.role}')">
+                   ✏️ Edit
+                 </button>
+                 <button class="btn btn-sm" style="background:var(--bg-glass-light); border:1px solid var(--border-light); color:var(--text-primary); font-weight:600; padding:6px 12px; border-radius:var(--radius-sm); font-size:12px;" onclick="promptResetPassword('${u._id}', '${u.name.replace(/'/g, "\\'")}')">
+                   🔑 Password
+                 </button>
                  ${u.frozen_until && new Date(u.frozen_until) > new Date()
                    ? `<button class="btn btn-sm" style="background:var(--secondary); color:white; font-weight:600; padding:6px 12px; border-radius:var(--radius-sm); font-size:12px;" onclick="handleUnfreezeUser('${u._id}', '${u.name.replace(/'/g, "\\'")}')">
                         🔥 Unfreeze
@@ -1876,7 +1882,135 @@ async function toggleUserHistoryDetail(userId) {
   }
 }
 
+function promptEditUser(userId, userName, userEmail, userPhone, userDistrict, userRole) {
+  const existing = document.getElementById('adminEditUserModal');
+  if (existing) existing.remove();
+
+  const districtOptions = DISTRICTS.map(d =>
+    `<option value="${d}" ${d === userDistrict ? 'selected' : ''}>${getDistrictName(d)}</option>`
+  ).join('');
+
+  const roleOptions = [
+    ['user', '👤 Regular User'],
+    ['district_admin', '🏘️ District Admin'],
+    ['state_admin', '🛡️ State Admin']
+  ].map(([val, label]) =>
+    `<option value="${val}" ${val === userRole ? 'selected' : ''}>${label}</option>`
+  ).join('');
+
+  const modal = document.createElement('div');
+  modal.id = 'adminEditUserModal';
+  modal.style.cssText = `position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.8);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:16px;`;
+  modal.innerHTML = `
+    <div class="card" style="background:var(--bg-card);border:1px solid var(--border-color);border-radius:var(--radius-lg);padding:24px;width:100%;max-width:460px;animation:scaleUp 0.2s ease;margin:0;box-shadow:var(--shadow-lg);max-height:90vh;overflow-y:auto;">
+      <h3 style="font-size:16px;font-weight:800;color:var(--text-primary);margin:0 0 4px;">✏️ Edit User: ${userName}</h3>
+      <p style="font-size:12px;color:var(--text-secondary);margin:0 0 20px;">Update user details. Leave a field blank to keep it unchanged.</p>
+
+      <div class="form-group">
+        <label class="form-label">Full Name</label>
+        <input type="text" class="form-input" id="editUserName" value="${userName || ''}" placeholder="Full Name">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Email</label>
+        <input type="email" class="form-input" id="editUserEmail" value="${userEmail || ''}" placeholder="Email">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Phone</label>
+        <input type="tel" class="form-input" id="editUserPhone" value="${userPhone || ''}" placeholder="Phone">
+      </div>
+      <div class="form-group">
+        <label class="form-label">District</label>
+        <select class="form-select" id="editUserDistrict">
+          ${districtOptions}
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Role</label>
+        <select class="form-select" id="editUserRole">
+          ${roleOptions}
+        </select>
+      </div>
+      <div id="editUserError" style="display:none;color:var(--danger);font-size:12px;margin-bottom:12px;font-weight:600;"></div>
+      <div style="display:flex;gap:10px;">
+        <button onclick="submitEditUser('${userId}')" class="btn btn-primary" style="flex:1;font-weight:700;">💾 Save Changes</button>
+        <button onclick="document.getElementById('adminEditUserModal').remove()" class="btn btn-outline" style="flex:0 0 auto;padding:10px 16px;">Cancel</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(modal);
+  modal.addEventListener('click', (e) => { if (e.target === modal) modal.remove(); });
+}
+
+async function submitEditUser(userId) {
+  const errorEl = document.getElementById('editUserError');
+  const data = {
+    name:     document.getElementById('editUserName')?.value.trim(),
+    email:    document.getElementById('editUserEmail')?.value.trim(),
+    phone:    document.getElementById('editUserPhone')?.value.trim(),
+    district: document.getElementById('editUserDistrict')?.value,
+    role:     document.getElementById('editUserRole')?.value,
+  };
+
+  // Remove empty fields
+  Object.keys(data).forEach(k => { if (!data[k]) delete data[k]; });
+
+  try {
+    const result = await api.editUser(userId, data);
+    showToast(result.message || 'User updated!', 'success');
+    document.getElementById('adminEditUserModal')?.remove();
+    loadAdminUsers();
+  } catch (error) {
+    if (errorEl) { errorEl.style.display = 'block'; errorEl.textContent = error.message; }
+  }
+}
+
+function promptResetPassword(userId, userName) {
+  const existing = document.getElementById('adminResetPwdModal');
+  if (existing) existing.remove();
+
+  const modal = document.createElement('div');
+  modal.id = 'adminResetPwdModal';
+  modal.style.cssText = `position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.8);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:16px;`;
+  modal.innerHTML = `
+    <div class="card" style="background:var(--bg-card);border:1px solid var(--border-color);border-radius:var(--radius-lg);padding:24px;width:100%;max-width:400px;animation:scaleUp 0.2s ease;margin:0;box-shadow:var(--shadow-lg);">
+      <h3 style="font-size:16px;font-weight:800;color:var(--text-primary);margin:0 0 4px;">🔑 Reset Password: ${userName}</h3>
+      <p style="font-size:12px;color:var(--text-secondary);margin:0 0 20px;">Enter a new password for this user. Minimum 6 characters.</p>
+      <div class="form-group">
+        <label class="form-label">New Password</label>
+        <div class="password-wrapper">
+          <input type="password" class="form-input" id="resetPwdInput" placeholder="New password (min 6 chars)" minlength="6">
+          <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('resetPwdInput', this)">👁️</button>
+        </div>
+      </div>
+      <div id="resetPwdError" style="display:none;color:var(--danger);font-size:12px;margin-bottom:12px;font-weight:600;"></div>
+      <div style="display:flex;gap:10px;">
+        <button onclick="submitResetPassword('${userId}')" class="btn btn-primary" style="flex:1;font-weight:700;background:var(--warning);border-color:var(--warning);">🔑 Reset Password</button>
+        <button onclick="document.getElementById('adminResetPwdModal').remove()" class="btn btn-outline" style="flex:0 0 auto;padding:10px 16px;">Cancel</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(modal);
+  modal.addEventListener('click', (e) => { if (e.target === modal) modal.remove(); });
+}
+
+async function submitResetPassword(userId) {
+  const newPassword = document.getElementById('resetPwdInput')?.value;
+  const errorEl = document.getElementById('resetPwdError');
+  if (!newPassword || newPassword.length < 6) {
+    if (errorEl) { errorEl.style.display = 'block'; errorEl.textContent = 'Password must be at least 6 characters.'; }
+    return;
+  }
+  try {
+    const result = await api.resetUserPassword(userId, newPassword);
+    showToast(result.message || 'Password reset!', 'success');
+    document.getElementById('adminResetPwdModal')?.remove();
+  } catch (error) {
+    if (errorEl) { errorEl.style.display = 'block'; errorEl.textContent = error.message; }
+  }
+}
+
 async function handleDeleteUser(userId, userName) {
+
   const confirmed = confirm(`${t('confirmDeleteUser') || 'Are you sure you want to delete this user and all their data?'} (${userName})`);
   if (!confirmed) return;
 

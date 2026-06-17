@@ -130,6 +130,8 @@ class ApiClient {
   async reviewFlag(flagId, action) { return this.request('POST', `/admin/flags/${flagId}/review`, { action }); }
   async getAdminUsers() { return this.request('GET', '/admin/users'); }
   async deleteUser(userId) { return this.request('DELETE', `/admin/users/${userId}`); }
+  async editUser(userId, data) { return this.request('PUT', `/admin/users/${userId}`, data); }
+  async resetUserPassword(userId, newPassword) { return this.request('POST', `/admin/users/${userId}/reset-password`, { newPassword }); }
   async freezeUser(userId, frozenUntil) { return this.request('POST', `/admin/users/${userId}/freeze`, { frozenUntil }); }
   async unfreezeUser(userId) { return this.request('POST', `/admin/users/${userId}/unfreeze`); }
 

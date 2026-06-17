@@ -87,6 +87,74 @@ router.delete('/users/:id', auth, roleGuard('state_admin'), async (req, res) => 
 });
 
 /**
+ * PUT /api/admin/users/:id
+ * Edit user details (name, email, phone, district, role)
+ */
+router.put('/users/:id', auth, roleGuard('state_admin'), async (req, res) => {
+  try {
+    const { name, email, phone, district, role } = req.body;
+    const user = await User.findById(req.params.id);
+    if (!user) return res.status(404).json({ error: 'User not found.' });
+
+    // Prevent demoting yourself
+    if (req.params.id === req.userId.toString() && role && role !== user.role) {
+      return res.status(400).json({ error: 'Cannot change your own role.' });
+    }
+
+    // Check for duplicate email/phone (exclude current user)
+    if (email && email !== user.email) {
+      const emailExists = await User.findOne({ email, _id: { $ne: req.params.id } });
+      if (emailExists) return res.status(400).json({ error: 'Email already in use by another account.' });
+    }
+    if (phone && phone !== user.phone) {
+      const phoneExists = await User.findOne({ phone, _id: { $ne: req.params.id } });
+      if (phoneExists) return res.status(400).json({ error: 'Phone already in use by another account.' });
+    }
+
+    if (name)     user.name     = name.trim();
+    if (email)    user.email    = email.trim().toLowerCase();
+    if (phone)    user.phone    = phone.trim();
+    if (district) user.district = district;
+    if (role && ['user', 'district_admin', 'state_admin'].includes(role)) user.role = role;
+
+    await user.save();
+    const updated = await User.findById(req.params.id).select('-password_hash');
+    res.json({ message: 'User updated successfully.', user: updated });
+  } catch (error) {
+    console.error('Edit user error:', error);
+    res.status(500).json({ error: 'Server error updating user.' });
+  }
+});
+
+/**
+ * POST /api/admin/users/:id/reset-password
+ * Reset any user's password (admin only)
+ */
+router.post('/users/:id/reset-password', auth, roleGuard('state_admin'), async (req, res) => {
+  try {
+    const { newPassword } = req.body;
+    if (!newPassword || newPassword.length < 6) {
+      return res.status(400).json({ error: 'New password must be at least 6 characters.' });
+    }
+
+    const user = await User.findById(req.params.id);
+    if (!user) return res.status(404).json({ error: 'User not found.' });
+
+    const bcrypt = require('bcryptjs');
+    const salt = await bcrypt.genSalt(10);
+    user.password_hash = await bcrypt.hash(newPassword, salt);
+    await user.save();
+
+    res.json({ message: `Password for ${user.name} has been reset successfully.` });
+  } catch (error) {
+    console.error('Reset password error:', error);
+    res.status(500).json({ error: 'Server error resetting password.' });
+  }
+});
+
+
+
+/**
  * POST /api/admin/users/:id/freeze
  * Freeze a user account for a specified number of days
  */
