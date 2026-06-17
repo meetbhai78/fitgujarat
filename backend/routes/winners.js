@@ -3,6 +3,29 @@ const auth = require('../middleware/auth');
 const roleGuard = require('../middleware/roleGuard');
 const upload = require('../middleware/upload');
 const WinnerPost = require('../models/WinnerPost');
+const cloudinary = require('cloudinary').v2;
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET
+});
+
+const uploadToCloudinary = (fileBuffer, mimeType) => {
+  return new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(
+      {
+        folder: 'fitgujarat_winners',
+        resource_type: 'auto'
+      },
+      (error, result) => {
+        if (error) reject(error);
+        else resolve(result);
+      }
+    );
+    stream.end(fileBuffer);
+  });
+};
 const {
   getDistrictWinners,
   getStateWinners,
@@ -145,7 +168,11 @@ router.post('/:id/media', auth, upload.single('media'), async (req, res) => {
     if (req.file) {
       // Determine media type from mimetype
       const isImage = req.file.mimetype.startsWith('image/');
-      post.media_url = `/uploads/${req.file.filename}`;
+      
+      // Upload to Cloudinary
+      const uploadResult = await uploadToCloudinary(req.file.buffer, req.file.mimetype);
+      
+      post.media_url = uploadResult.secure_url;
       post.media_type = isImage ? 'image' : 'audio';
       post.approval_status = 'pending'; // needs admin approval after media upload
     }
