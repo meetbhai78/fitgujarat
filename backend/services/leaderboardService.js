@@ -26,13 +26,12 @@ async function computeOverallLeaderboard(district, cycleStart, cycleEnd) {
   const startDate = formatDate(cycleStart);
   const endDate = formatDate(cycleEnd);
 
-  // Build user filter
-  let userFilter = {};
-  if (district !== 'STATE') {
-    const users = await User.find({ district }).select('_id');
-    const userIds = users.map(u => u._id);
-    userFilter = { user_id: { $in: userIds } };
-  }
+  // Build user filter (only count regular users)
+  const users = district !== 'STATE'
+    ? await User.find({ district, role: 'user' }).select('_id')
+    : await User.find({ role: 'user' }).select('_id');
+  const userIds = users.map(u => u._id);
+  const userFilter = { user_id: { $in: userIds } };
 
   const pipeline = [
     {
@@ -105,12 +104,12 @@ async function computeStreakLeaderboard(district, cycleStart, cycleEnd) {
  * Highest single-day score ever achieved
  */
 async function computePeakDayLeaderboard(district, cycleStart, cycleEnd) {
-  let userFilter = {};
-  if (district !== 'STATE') {
-    const users = await User.find({ district }).select('_id');
-    const userIds = users.map(u => u._id);
-    userFilter = { user_id: { $in: userIds } };
-  }
+  // Build user filter (only count regular users)
+  const users = district !== 'STATE'
+    ? await User.find({ district, role: 'user' }).select('_id')
+    : await User.find({ role: 'user' }).select('_id');
+  const userIds = users.map(u => u._id);
+  const userFilter = { user_id: { $in: userIds } };
 
   const pipeline = [
     {

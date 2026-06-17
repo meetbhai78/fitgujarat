@@ -7,7 +7,8 @@
     "start": "node server.js",
     "dev": "node --watch server.js",
     "seed": "node seed.js",
-    "setup-admin": "node setup-admin.js"
+    "setup-admin": "node setup-admin.js",
+    "clear-data": "node clear-demo-data.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",

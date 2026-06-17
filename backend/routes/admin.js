@@ -310,6 +310,10 @@ router.get('/dashboard', auth, roleGuard('state_admin'), async (req, res) => {
   try {
     const todayStr = new Date().toISOString().split('T')[0];
 
+    // Fetch all admin user ObjectIds to exclude them from dashboard calculations
+    const adminUsers = await User.find({ role: { $ne: 'user' } }).select('_id');
+    const adminIds = adminUsers.map(u => u._id);
+
     // 1. Core Counts
     const [
       totalUsers,
@@ -325,15 +329,15 @@ router.get('/dashboard', auth, roleGuard('state_admin'), async (req, res) => {
       FraudFlag.countDocuments({}),
       FraudFlag.countDocuments({ status: 'pending' }),
       ActivityLog.aggregate([
-        { $match: { is_flagged: { $ne: true } } },
+        { $match: { is_flagged: { $ne: true }, user_id: { $nin: adminIds } } },
         { $group: { _id: null, total: { $sum: '$raw_value' } } }
       ])
     ]);
 
     const totalStepsAllTime = totalStepsAllTimeResult[0]?.total || 0;
 
-    // 2. Today's active stats
-    const todayLogs = await ActivityLog.find({ date: todayStr });
+    // 2. Today's active stats (excluding admins)
+    const todayLogs = await ActivityLog.find({ date: todayStr, user_id: { $nin: adminIds } });
     const activeTodayCount = new Set(todayLogs.map(l => l.user_id.toString())).size;
     const totalStepsToday = todayLogs.reduce((sum, log) => sum + (log.is_flagged ? 0 : log.raw_value), 0);
     const avgStepsToday = activeTodayCount > 0 ? Math.round(totalStepsToday / activeTodayCount) : 0;
@@ -346,12 +350,12 @@ router.get('/dashboard', auth, roleGuard('state_admin'), async (req, res) => {
       created_at: { $gte: sevenDaysAgo }
     });
 
-    // Active this week (unique users in last 7 days)
+    // Active this week (unique users in last 7 days, excluding admins)
     const sevenDaysAgoStr = sevenDaysAgo.toISOString().split('T')[0];
-    const weeklyLogs = await ActivityLog.find({ date: { $gte: sevenDaysAgoStr } });
+    const weeklyLogs = await ActivityLog.find({ date: { $gte: sevenDaysAgoStr }, user_id: { $nin: adminIds } });
     const activeThisWeekCount = new Set(weeklyLogs.map(l => l.user_id.toString())).size;
 
-    // 4. Last 7 Days Activity Trend
+    // 4. Last 7 Days Activity Trend (excluding admins)
     const trendDates = [];
     for (let i = 6; i >= 0; i--) {
       const d = new Date();
@@ -360,7 +364,7 @@ router.get('/dashboard', auth, roleGuard('state_admin'), async (req, res) => {
     }
 
     const activityTrend = await Promise.all(trendDates.map(async (dateStr) => {
-      const logs = await ActivityLog.find({ date: dateStr });
+      const logs = await ActivityLog.find({ date: dateStr, user_id: { $nin: adminIds } });
       const uniqueUsers = new Set(logs.map(l => l.user_id.toString())).size;
       const stepSum = logs.reduce((sum, l) => sum + (l.is_flagged ? 0 : l.raw_value), 0);
       return {
@@ -370,9 +374,9 @@ router.get('/dashboard', auth, roleGuard('state_admin'), async (req, res) => {
       };
     }));
 
-    // 5. District metrics (Group activity steps by district)
+    // 5. District metrics (Group activity steps by district, excluding admins)
     const districtStatsAgg = await ActivityLog.aggregate([
-      { $match: { is_flagged: { $ne: true } } },
+      { $match: { is_flagged: { $ne: true }, user_id: { $nin: adminIds } } },
       {
         $lookup: {
           from: 'users',

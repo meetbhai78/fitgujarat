@@ -15,8 +15,14 @@ const router = express.Router();
  */
 router.post('/log', auth, async (req, res) => {
   try {
-    // Check if user is temporarily frozen for suspicious/fraud activity
     const user = await User.findById(req.userId);
+    
+    // Admins are not allowed to log steps
+    if (user && (user.role === 'state_admin' || user.role === 'district_admin')) {
+      return res.status(403).json({ error: 'Admins cannot log physical step activities.' });
+    }
+
+    // Check if user is temporarily frozen for suspicious/fraud activity
     if (user && user.frozen_until && new Date(user.frozen_until) > new Date()) {
       const remainingDays = Math.ceil((new Date(user.frozen_until) - new Date()) / (1000 * 60 * 60 * 24));
       return res.status(403).json({

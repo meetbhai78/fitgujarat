@@ -1638,7 +1638,7 @@ async function renderAdminDashboard() {
                 <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 8px;">
                   <div style="font-size: 11px; color: var(--text-secondary); font-weight: 600;">Manual Declarations Trigger:</div>
                   <div style="display: flex; gap: 8px;">
-                    <button class="btn btn-sm" style="flex: 1; font-weight: 700; font-size: 12px; padding: 10px;" onclick="triggerManualWinners('weekly')">
+                    <button class="btn btn-sm btn-primary" style="flex: 1; font-weight: 700; font-size: 12px; padding: 10px;" onclick="triggerManualWinners('weekly')">
                       Weekly Winners
                     </button>
                     <button class="btn btn-sm btn-outline" style="flex: 1; font-weight: 700; font-size: 12px; padding: 10px;" onclick="triggerManualWinners('monthly')">
@@ -2341,38 +2341,47 @@ async function loadAdminWinners(statusFilter) {
           // Media preview
           let mediaPrev = '';
           if (p.media_type === 'image' && p.media_url) {
-            mediaPrev = `<img src="${p.media_url}" style="width:100%; max-height:200px; object-fit:cover; border-radius:8px; margin:10px 0;" onerror="this.style.display='none'">`;
+            mediaPrev = `<img src="${p.media_url}" style="width:100%; max-height:200px; object-fit:cover; border-radius:12px; margin:10px 0; border: 1px solid var(--border-color);" onerror="this.style.display='none'">`;
           } else if (p.media_type === 'audio' && p.media_url) {
-            mediaPrev = `<audio controls style="width:100%; margin:10px 0;"><source src="${p.media_url}"></audio>`;
+            mediaPrev = `<audio controls style="width:100%; margin:10px 0; border-radius: 8px;"><source src="${p.media_url}"></audio>`;
           } else {
             mediaPrev = `<div style="font-size:11px; color:var(--text-muted); margin:6px 0; font-style:italic;">📭 No media uploaded</div>`;
           }
 
           return `
-            <div style="background:var(--bg-elevated); border:1px solid ${p.approval_status==='pending' ? 'var(--warning)' : 'var(--border-color)'}; border-radius:var(--radius-md); padding:16px; position:relative;">
+            <div class="card" style="margin-bottom:0; padding:16px; border: 1px solid var(--border-color); position:relative; display:flex; flex-direction:column; gap:8px;">
               <!-- Status badge -->
-              <div style="position:absolute; top:12px; right:12px; font-size:11px; font-weight:700; color:${statusColor}; background:${statusColor}20; padding:3px 10px; border-radius:20px; border:1px solid ${statusColor};">${statusEmoji} ${p.approval_status.toUpperCase()}</div>
+              <div style="position:absolute; top:16px; right:16px; font-size:10px; font-weight:700; color:${statusColor}; background:${statusColor}20; padding:3px 10px; border-radius:20px; border:1px solid ${statusColor};">${statusEmoji} ${p.approval_status.toUpperCase()}</div>
 
               <!-- User info -->
-              <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
-                <div style="width:36px; height:36px; border-radius:50%; background:var(--primary); display:flex; align-items:center; justify-content:center; font-weight:700; color:white; font-size:13px;">${getInitials(p.user_id?.name || '?')}</div>
+              <div style="display:flex; align-items:center; gap:12px; margin-bottom:4px;">
+                <div style="width:40px; height:40px; border-radius:50%; background: linear-gradient(135deg, var(--bg-elevated) 0%, rgba(255,255,255,0.03) 100%); border: 1.5px solid var(--border-light); display:flex; align-items:center; justify-content:center; font-weight:800; color:var(--text-primary); font-size:14px; box-shadow: var(--shadow-sm); flex-shrink:0;">
+                  ${getInitials(p.user_id?.name || '?')}
+                </div>
                 <div>
-                  <div style="font-weight:700; font-size:14px; color:var(--text-primary);">${p.user_id?.name || 'Unknown'}</div>
-                  <div style="font-size:11px; color:var(--text-secondary);">${categoryMeta.emoji} ${categoryMeta.text} · ${p.level === 'state' ? 'State' : getDistrictName(p.district)} · ${freq === 'weekly' ? '📅 Weekly' : '🗓️ Monthly'}</div>
+                  <div style="font-weight:700; font-size:14px; color:var(--text-primary);">${p.user_id?.name || 'Unknown User'}</div>
+                  <div style="font-size:11px; color:var(--primary-light); font-weight:600; margin-top:2px;">
+                    ${categoryMeta.emoji} ${categoryMeta.text} · ${p.level === 'state' ? 'State Level' : (getDistrictName(p.district) || 'District Level')}
+                  </div>
                 </div>
               </div>
 
-              <div style="font-size:11px; color:var(--text-muted); margin-bottom:6px;">📅 ${cycleLabel} · 🏅 ${p.value?.toLocaleString()} pts</div>
+              <!-- Cycle Meta details -->
+              <div style="font-size:12px; color:var(--text-secondary); display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-top:4px;">
+                <span style="background:var(--bg-glass-light); padding:2px 8px; border-radius:6px; border:1px solid var(--border-color);">${freq === 'weekly' ? '📅 Weekly' : '🗓️ Monthly'}</span>
+                <span>🏅 <strong>${(p.value || 0).toLocaleString()}</strong> pts</span>
+                <span style="opacity:0.6;">· ${cycleLabel}</span>
+              </div>
 
               ${mediaPrev}
 
-              ${p.caption ? `<div style="font-size:13px; color:var(--text-primary); margin:8px 0; padding:10px; background:var(--bg-glass-light); border-radius:8px; border-left:3px solid var(--primary);">${p.caption}</div>` : ''}
+              ${p.caption ? `<div style="font-size:13px; color:var(--text-primary); margin:6px 0; padding:10px; background:var(--bg-glass-light); border-radius:8px; border-left:3px solid var(--primary);">${p.caption}</div>` : ''}
 
               <!-- Action buttons -->
-              <div style="display:flex; gap:8px; margin-top:12px; flex-wrap:wrap;">
-                ${p.approval_status !== 'approved' ? `<button class="btn btn-sm btn-success" onclick="handleApproveWinnerPost('${p._id}')" style="flex:1; min-width:80px;">✅ Approve</button>` : ''}
-                ${p.approval_status !== 'rejected' ? `<button class="btn btn-sm" onclick="handleRejectWinnerPost('${p._id}')" style="flex:1; min-width:80px; background:rgba(239,68,68,0.1); border:1px solid var(--danger); color:var(--danger);">❌ Reject</button>` : ''}
-                <button class="btn btn-sm" onclick="handleDeleteWinnerPost('${p._id}')" style="background:var(--danger); color:white;">🗑️ Delete</button>
+              <div style="display:flex; gap:8px; margin-top:8px; flex-wrap:wrap; border-top: 1px solid rgba(255,255,255,0.04); padding-top:12px; justify-content:flex-end;">
+                ${p.approval_status !== 'approved' ? `<button class="btn btn-sm btn-success" onclick="handleApproveWinnerPost('${p._id}')" style="min-width:80px; padding:6px 14px; border-radius:8px; font-size:12px;">✅ Approve</button>` : ''}
+                ${p.approval_status !== 'rejected' ? `<button class="btn btn-sm" onclick="handleRejectWinnerPost('${p._id}')" style="min-width:80px; background:rgba(239,68,68,0.1); border:1px solid var(--danger); color:var(--danger); font-weight:600; padding:6px 14px; border-radius:8px; font-size:12px;">❌ Reject</button>` : ''}
+                <button class="btn btn-sm" onclick="handleDeleteWinnerPost('${p._id}')" style="background:rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.25); color:var(--danger); font-weight:600; padding:6px 14px; border-radius:8px; font-size:12px;">🗑️ Delete</button>
               </div>
             </div>
           `;
