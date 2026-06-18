@@ -510,47 +510,126 @@ async function loadDashboardData(user) {
 }
 
 async function handleSyncSteps() {
-  const syncBtn = document.querySelector('.sync-btn');
-  if (syncBtn) {
-    syncBtn.disabled = true;
-    syncBtn.innerHTML = `<span>⏳</span> ${t('readingSensor')}`;
-  }
-
-  try {
-    if (isNativeApp() && isSensorAvailable()) {
-      // Native App: force hardware sensor sync
+  if (isNativeApp() && isSensorAvailable()) {
+    // Native App: force hardware sensor sync
+    const syncBtn = document.querySelector('.sync-btn');
+    if (syncBtn) {
+      syncBtn.disabled = true;
+      syncBtn.innerHTML = `<span>⏳</span> ${t('readingSensor')}`;
+    }
+    try {
       const syncResult = await forceSync();
       if (syncResult.success) {
         showToast(`${syncResult.steps.toLocaleString()} ${t('steps')} ${t('logged')}!`);
       } else {
         throw new Error(syncResult.reason || 'Failed to read sensor');
       }
-    } else {
-      // Web Browser / No Sensor: sync the currently accumulated simulated steps
-      // Add a tiny random walk increment (5-15 steps) immediately to show the click resolved
-      const increment = Math.floor(Math.random() * 11) + 5;
-      _liveStepCount += increment;
-      
-      // Perform immediate sync of current _liveStepCount
-      await autoSyncStepsToBackend();
-      showToast(`${_liveStepCount.toLocaleString()} ${t('steps')} ${t('logged')}!`);
-      
-      // Force refresh of the active view
-      if (currentPage === 'dashboard') {
-        renderDashboard(document.getElementById('pageContainer'));
-      } else if (currentPage === 'activity') {
-        loadActivityData();
+    } catch (error) {
+      showToast(error.message || 'Sync failed', 'error');
+    } finally {
+      if (syncBtn) {
+        syncBtn.disabled = false;
+        syncBtn.innerHTML = `<span>🔄</span> ${t('syncSteps')}`;
       }
     }
-  } catch (error) {
-    showToast(error.message || 'Sync failed', 'error');
-  } finally {
-    if (syncBtn) {
-      syncBtn.disabled = false;
-      syncBtn.innerHTML = `<span>🔄</span> ${t('syncSteps')}`;
-    }
+  } else {
+    // Web/Browser: show manual step entry modal
+    openManualStepEntryModal();
   }
 }
+
+/**
+ * Open a manual step entry modal for web users
+ */
+function openManualStepEntryModal() {
+  const existing = document.getElementById('manualStepModal');
+  if (existing) existing.remove();
+
+  // Get today's already-logged baseline
+  const currentSteps = _liveStepCount || 0;
+
+  const modal = document.createElement('div');
+  modal.id = 'manualStepModal';
+  modal.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.75);backdrop-filter:blur(6px);display:flex;align-items:flex-end;justify-content:center;padding:0;';
+  modal.innerHTML = `
+    <div style="background:var(--bg-card);border-radius:20px 20px 0 0;padding:28px 20px 36px;width:100%;max-width:600px;animation:slideUp 0.3s ease;">
+      <div style="width:40px;height:4px;background:var(--border-color);border-radius:2px;margin:0 auto 20px;"></div>
+      <div style="font-size:20px;font-weight:800;color:var(--text-primary);margin-bottom:6px;">👣 ${t('enterRealSteps')}</div>
+      <div style="font-size:13px;color:var(--text-secondary);margin-bottom:20px;line-height:1.5;">
+        ${t('enterRealStepsDesc')}
+      </div>
+      <div style="background:var(--bg-glass-light);border:1px solid var(--border-color);border-radius:12px;padding:14px 16px;margin-bottom:16px;display:flex;align-items:center;gap:10px;">
+        <span style="font-size:24px;">📱</span>
+        <div>
+          <div style="font-size:11px;color:var(--text-secondary);font-weight:600;">CURRENT LOGGED STEPS TODAY</div>
+          <div style="font-size:18px;font-weight:800;color:var(--primary);">${currentSteps.toLocaleString()} steps</div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label" style="font-size:13px;font-weight:700;">Enter Step Count from Health App:</label>
+        <input type="number" id="manualStepInput" class="form-input" min="0" max="100000"
+          placeholder="e.g. 4500"
+          style="font-size:22px;font-weight:800;text-align:center;padding:16px;letter-spacing:2px;"
+        >
+      </div>
+      <div id="manualStepError" style="display:none;color:var(--danger);font-size:12px;margin-bottom:12px;font-weight:600;"></div>
+      <div style="display:flex;gap:10px;">
+        <button onclick="submitManualSteps()" id="manualStepSubmitBtn" class="btn btn-primary" style="flex:1;font-weight:800;padding:14px;font-size:15px;">
+          ✅ ${t('logSteps')}
+        </button>
+        <button onclick="document.getElementById('manualStepModal').remove()" class="btn btn-outline" style="flex:0 0 auto;padding:14px 16px;">
+          Cancel
+        </button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(modal);
+  modal.addEventListener('click', (e) => { if (e.target === modal) modal.remove(); });
+  setTimeout(() => { document.getElementById('manualStepInput')?.focus(); }, 300);
+}
+
+async function submitManualSteps() {
+  const input = document.getElementById('manualStepInput');
+  const errorEl = document.getElementById('manualStepError');
+  const submitBtn = document.getElementById('manualStepSubmitBtn');
+  if (!input) return;
+
+  const steps = parseInt(input.value);
+  if (isNaN(steps) || steps < 0) {
+    errorEl.style.display = 'block';
+    errorEl.textContent = 'Please enter a valid step count (0 or more).';
+    return;
+  }
+  if (steps > 100000) {
+    errorEl.style.display = 'block';
+    errorEl.textContent = 'Step count seems too high. Please check and try again.';
+    return;
+  }
+
+  errorEl.style.display = 'none';
+  submitBtn.disabled = true;
+  submitBtn.textContent = '⏳ Logging...';
+
+  try {
+    // Update live step count to match manual entry
+    _liveStepCount = steps;
+    _lastSyncedSteps = 0; // Force sync even if same value
+    await autoSyncStepsToBackend();
+    document.getElementById('manualStepModal')?.remove();
+    showToast(`✅ ${steps.toLocaleString()} ${t('steps')} ${t('logged')}!`, 'success');
+    if (currentPage === 'dashboard') {
+      renderDashboard(document.getElementById('pageContainer'));
+    } else if (currentPage === 'activity') {
+      loadActivityData();
+    }
+  } catch (error) {
+    errorEl.style.display = 'block';
+    errorEl.textContent = error.message || 'Failed to log steps. Please try again.';
+    submitBtn.disabled = false;
+    submitBtn.textContent = '✅ Log Steps';
+  }
+}
+
 
 /**
  * Submit step count to the backend API

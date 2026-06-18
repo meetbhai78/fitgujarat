@@ -461,7 +461,10 @@ async function initAutoStepCounter() {
  * Set up automated step simulation for web/demo mode (increments steps incrementally over time)
  */
 function setupWebSimulation() {
-  console.log('Step counter: Pedometer sensor not available. Starting simulated auto-sync increments.');
+  console.log('Step counter: Pedometer sensor not available. Web display mode only - no auto-sync.');
+  // In web mode, we only display a visual counter but do NOT auto-sync to backend
+  // Users must manually enter their real step count from their health app
+  // This prevents fake/simulated step counts from being recorded
   if (!_stepListenerSetup) {
     setInterval(() => {
       // Check if date changed (midnight transition)
@@ -470,18 +473,17 @@ function setupWebSimulation() {
         _todayStepsBaseline = 0;
         _trackingDate = currentDate;
         localStorage.setItem('todayStepsBaseline', '0');
+        _liveStepCount = 0;
       }
 
-      // Simulate a natural walking pace (add 2 to 8 random steps every 5 seconds)
-      const increment = Math.floor(Math.random() * 7) + 2;
-      _liveStepCount += increment;
-
-      // Update the dashboard UI in real-time if visible
-      updateLiveStepDisplay(_liveStepCount);
+      // Visual simulation only - just update the ring display
+      // Do NOT increment _liveStepCount for auto-sync (prevents fake steps)
+      // updateLiveStepDisplay(_liveStepCount); // no visual simulation either
     }, 5000);
     _stepListenerSetup = true;
   }
 }
+
 
 /**
  * Update the live step count display on the dashboard
@@ -506,18 +508,24 @@ function updateLiveStepDisplay(steps) {
 }
 
 /**
- * Start auto-sync timer
+ * Start auto-sync timer (native app only)
  */
 function startAutoSync() {
   if (_autoSyncInterval) clearInterval(_autoSyncInterval);
+  // Only auto-sync on native apps with real sensor data
+  if (!isNativeApp()) return;
   _autoSyncInterval = setInterval(() => {
     autoSyncStepsToBackend();
   }, AUTO_SYNC_INTERVAL_MS);
 }
 
+
 /**
  * Auto-sync current steps to the backend
+ * In web mode: only called explicitly from submitManualSteps()
+ * In native mode: called by timer and on resume
  */
+
 async function autoSyncStepsToBackend() {
   if (_liveStepCount <= 0) return;
 
