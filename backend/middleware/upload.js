@@ -3,14 +3,10 @@ const multer = require('multer');
 const storage = multer.memoryStorage();
 
 const fileFilter = (req, file, cb) => {
-  const allowed = [
-    'image/jpeg', 'image/png', 'image/gif', 'image/webp',
-    'audio/mpeg', 'audio/wav', 'audio/ogg', 'audio/mp4', 'audio/aac'
-  ];
-  if (allowed.includes(file.mimetype)) {
+  if (file.mimetype.startsWith('image/') || file.mimetype.startsWith('audio/')) {
     cb(null, true);
   } else {
-    cb(new Error('Only images (JPEG, PNG, GIF, WebP) and audio (MP3, WAV, OGG) are allowed.'), false);
+    cb(new Error('Only images and audio are allowed.'), false);
   }
 };
 

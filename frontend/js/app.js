@@ -699,7 +699,7 @@ async function renderLeaderboard(container) {
     <div class="page-content">
       <div class="page-header">
         <h1 class="page-title">${t('leaderboard')}</h1>
-        <p class="page-subtitle">${getDistrictName(user.district)}</p>
+        <p class="page-subtitle">${lbLevel === 'district' ? getDistrictName(user.district) : t('stateLevel')}</p>
       </div>
 
       <!-- Segmented View Toggle -->
@@ -805,7 +805,8 @@ async function loadLeaderboard() {
         ? `<img src="${entry.profile_photo_url}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`
         : `<span style="font-weight:800;font-size:${actualRank===1?'20px':'16px'}">${getInitials(entry.name)}</span>`;
       podiumHtml += `
-        <div class="podium-item">
+        <div class="podium-item" style="position:relative;">
+          ${!isYou ? `<button class="report-btn" onclick="openReportModal('${entry.user_id}','${(entry.name||'User').replace(/'/g,"\\'")}')" title="Report user" style="position:absolute; top:-10px; right:-10px; z-index:10;">🚩</button>` : ''}
           <div class="user-avatar ${actualRank===1?'lg':'md'} ${rankClass}" style="margin:0 auto 6px; ${isYou?'outline:2px solid var(--primary);':''}">${avatarContent}</div>
           <div class="podium-name" ${isYou ? 'style="color:var(--primary);"' : ''}>${entry.name || 'User'}</div>
           <div class="podium-score">${formatNumber(entry.value)}</div>

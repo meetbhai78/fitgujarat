@@ -359,7 +359,7 @@ async function initAutoStepCounter() {
   // 1) Initialize hardware sensor on native platforms
   if (isNativeApp()) {
     try {
-      const Pedometer = window.Capacitor.Plugins.CapacitorPedometer;
+      const Pedometer = window.Capacitor.Plugins.StepCounter || window.Capacitor.Plugins.CapacitorPedometer;
       if (!Pedometer) {
         _sensorAvailable = false;
         setupWebSimulation();
@@ -368,7 +368,7 @@ async function initAutoStepCounter() {
 
       // Check if sensor hardware exists
       const check = await Pedometer.isAvailable();
-      _sensorAvailable = check.stepCounting;
+      _sensorAvailable = check.available !== undefined ? check.available : check.stepCounting;
 
       if (!_sensorAvailable) {
         console.warn('Step counter sensor not available on this device');
@@ -376,22 +376,29 @@ async function initAutoStepCounter() {
         return;
       }
 
-      // Request permissions
-      try {
-        const permStatus = await Pedometer.checkPermissions();
-        if (permStatus.activityRecognition !== 'granted') {
-          await Pedometer.requestPermissions();
+      // Request permissions (if available on the plugin)
+      if (Pedometer.checkPermissions) {
+        try {
+          const permStatus = await Pedometer.checkPermissions();
+          if (permStatus.activityRecognition !== 'granted') {
+            await Pedometer.requestPermissions();
+          }
+        } catch (e) {
+          console.warn('Permission request failed:', e);
         }
-      } catch (e) {
-        console.warn('Permission request failed:', e);
       }
 
       // Start tracking from hardware sensor
-      await Pedometer.startMeasurementUpdates();
+      if (Pedometer.startTracking) {
+        await Pedometer.startTracking();
+      } else if (Pedometer.startMeasurementUpdates) {
+        await Pedometer.startMeasurementUpdates();
+      }
 
       // Listen for real-time step updates from native sensor
       if (!_stepListenerSetup) {
-        await Pedometer.addListener('measurement', (data) => {
+        const eventName = Pedometer.startTracking ? 'stepUpdate' : 'measurement';
+        await Pedometer.addListener(eventName, (data) => {
           // Check if date changed (midnight transition)
           const currentDate = getTodayDate();
           if (currentDate !== _trackingDate) {
@@ -400,8 +407,27 @@ async function initAutoStepCounter() {
             localStorage.setItem('todayStepsBaseline', '0');
           }
 
-          const sessionSteps = data.numberOfSteps || 0;
-          _liveStepCount = _todayStepsBaseline + sessionSteps;
+          // Use data.steps for custom plugin or data.numberOfSteps for capacitor-pedometer
+          const sessionSteps = data.steps !== undefined ? data.steps : (data.numberOfSteps || 0);
+          
+          // For StepCounter custom plugin, it gives total today steps, NOT session steps.
+          // Wait, data.steps is todaySteps in Java plugin!
+          // So if it's our custom plugin, _liveStepCount is just _todayStepsBaseline + (we don't want to double add)
+          // Java plugin handles the midnight reset and gives `todaySteps` since last tracking.
+          // But wait, the previous code was `_liveStepCount = _todayStepsBaseline + sessionSteps;`
+          // If we use the custom plugin which gives today's total steps, we should just use that if it exists.
+          if (Pedometer.startTracking && data.steps !== undefined) {
+             // For the custom plugin, data.steps is the actual exact steps taken today.
+             // We can just use it directly! BUT wait! If user logs out and logs in on another device,
+             // _todayStepsBaseline holds backend steps.
+             // It's safer to use the native steps directly if they are higher, or add them.
+             // The Java plugin gives steps since it started tracking today. So it IS session steps!
+             // Wait, Java plugin todaySteps = Math.max(0, (int)(totalStepsSinceReboot - baselineSteps));
+             // baselineSteps is set when tracking starts or day changes. So it's effectively session steps!
+             _liveStepCount = _todayStepsBaseline + sessionSteps;
+          } else {
+             _liveStepCount = _todayStepsBaseline + sessionSteps;
+          }
           
           // Update the dashboard UI in real-time if visible
           updateLiveStepDisplay(_liveStepCount);
@@ -548,11 +574,16 @@ async function forceSync() {
       localStorage.setItem('todayStepsBaseline', '0');
     }
 
-    const Pedometer = window.Capacitor.Plugins.CapacitorPedometer;
+    const Pedometer = window.Capacitor.Plugins.StepCounter || window.Capacitor.Plugins.CapacitorPedometer;
     
     // Stop and restart updates to force immediate hardware sensor read
-    await Pedometer.stopMeasurementUpdates();
-    await Pedometer.startMeasurementUpdates();
+    if (Pedometer.stopTracking) {
+      await Pedometer.stopTracking();
+      await Pedometer.startTracking();
+    } else if (Pedometer.stopMeasurementUpdates) {
+      await Pedometer.stopMeasurementUpdates();
+      await Pedometer.startMeasurementUpdates();
+    }
 
     // Give the sensor a tiny moment to register a reading
     await new Promise(resolve => setTimeout(resolve, 500));
@@ -586,9 +617,14 @@ function stopAutoStepCounter() {
     clearInterval(_autoSyncInterval);
     _autoSyncInterval = null;
   }
-  if (isNativeApp() && window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.CapacitorPedometer) {
+  if (isNativeApp() && window.Capacitor && window.Capacitor.Plugins) {
     try {
-      window.Capacitor.Plugins.CapacitorPedometer.stopMeasurementUpdates();
+      const Pedometer = window.Capacitor.Plugins.StepCounter || window.Capacitor.Plugins.CapacitorPedometer;
+      if (Pedometer && Pedometer.stopTracking) {
+        Pedometer.stopTracking();
+      } else if (Pedometer && Pedometer.stopMeasurementUpdates) {
+        Pedometer.stopMeasurementUpdates();
+      }
     } catch (e) {
       console.warn('Failed to stop native tracking:', e);
     }
