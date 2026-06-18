@@ -646,7 +646,7 @@ async function loadActivityData() {
     // Stats
     document.getElementById('activityStats').innerHTML = `
       <div class="stat-card primary">
-        <div class="stat-value">${formatNumber(data.stats?.totalSteps || 0)}</div>
+        <div class="stat-value" style="font-size: 20px;">${(data.stats?.totalSteps || 0).toLocaleString()}</div>
         <div class="stat-label">${t('steps')}</div>
       </div>
       <div class="stat-card accent">
@@ -678,7 +678,10 @@ async function loadActivityData() {
             <div class="rank-name">${formatDate(a.date)}</div>
             <div class="rank-district">${a.raw_value.toLocaleString()} ${t('steps')} ${a.is_flagged ? '⚠️' : ''}</div>
           </div>
-          <div class="rank-value">${a.calculated_score}</div>
+          <div class="rank-value" style="display:flex;flex-direction:column;align-items:flex-end;line-height:1.2;">
+            <span>${a.calculated_score}</span>
+            <span style="font-size:11px;font-weight:500;color:var(--text-muted);">${t('score')}</span>
+          </div>
         </div>
       `).join('');
     }

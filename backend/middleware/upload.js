@@ -3,11 +3,9 @@ const multer = require('multer');
 const storage = multer.memoryStorage();
 
 const fileFilter = (req, file, cb) => {
-  if (file.mimetype.startsWith('image/') || file.mimetype.startsWith('audio/')) {
-    cb(null, true);
-  } else {
-    cb(new Error('Only images and audio are allowed.'), false);
-  }
+  // Let Cloudinary handle the file validation
+  // This prevents strict mimetype issues with iOS HEIC/HEIF or octet-stream uploads
+  cb(null, true);
 };
 
 const upload = multer({
