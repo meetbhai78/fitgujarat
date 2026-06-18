@@ -376,12 +376,13 @@ async function initAutoStepCounter() {
         return;
       }
 
-      // Request permissions (if available on the plugin)
-      if (Pedometer.checkPermissions) {
+      // Request permissions using CapacitorPedometer if custom plugin doesn't support it
+      const PermPlugin = Pedometer.checkPermissions ? Pedometer : window.Capacitor.Plugins.CapacitorPedometer;
+      if (PermPlugin && PermPlugin.checkPermissions) {
         try {
-          const permStatus = await Pedometer.checkPermissions();
+          const permStatus = await PermPlugin.checkPermissions();
           if (permStatus.activityRecognition !== 'granted') {
-            await Pedometer.requestPermissions();
+            await PermPlugin.requestPermissions();
           }
         } catch (e) {
           console.warn('Permission request failed:', e);
