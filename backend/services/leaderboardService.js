@@ -209,13 +209,20 @@ async function getLeaderboard(district, type, cycleStart, cycleEnd) {
 
 /**
  * Get user's rank in a specific leaderboard
+ * Falls back to most recent leaderboard if no active cycle found
  */
 async function getUserRank(userId, district, type) {
-  const leaderboard = await Leaderboard.findOne({
+  // Try active cycle first
+  let leaderboard = await Leaderboard.findOne({
     district,
     type,
     cycle_end: { $gte: new Date() }
   }).sort({ updated_at: -1 });
+
+  // If no active cycle, fall back to most recent one
+  if (!leaderboard) {
+    leaderboard = await Leaderboard.findOne({ district, type }).sort({ updated_at: -1 });
+  }
 
   if (!leaderboard) return null;
 
@@ -225,6 +232,7 @@ async function getUserRank(userId, district, type) {
 
   return entry ? entry.rank : null;
 }
+
 
 function getMonthStart(date) {
   const d = new Date(date);
