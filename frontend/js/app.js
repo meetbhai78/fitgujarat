@@ -370,9 +370,6 @@ async function renderDashboard(container) {
         <button class="sync-btn" onclick="handleSyncSteps()">
           <span>🔄</span> ${t('syncSteps')}
         </button>
-        <button class="btn-link" onclick="openManualStepEntryModal()" style="background:none; border:none; color:var(--primary); font-size:12px; margin-top:8px; cursor:pointer; text-decoration:underline;">
-          ${t('manualEntry')}
-        </button>
       </div>
     `;
 
@@ -486,9 +483,6 @@ async function loadDashboardData(user) {
         <button class="sync-btn" onclick="handleSyncSteps()" style="margin-top:16px;">
           <span>🔄</span> ${t('syncSteps')}
         </button>
-        <button class="btn-link" onclick="openManualStepEntryModal()" style="background:none; border:none; color:var(--primary); font-size:12px; margin-top:8px; cursor:pointer; text-decoration:underline; display:block; margin-left:auto; margin-right:auto;">
-          ${t('manualEntry')}
-        </button>
       `;
     }
 
@@ -549,7 +543,6 @@ async function handleSyncSteps() {
       }
     } catch (error) {
       showToast(error.message || 'Sync failed', 'error');
-      openManualStepEntryModal();
     } finally {
       if (syncBtn) {
         syncBtn.disabled = false;
@@ -557,102 +550,11 @@ async function handleSyncSteps() {
       }
     }
   } else {
-    // Web/Browser: show manual step entry modal
-    openManualStepEntryModal();
+    showToast(currentLang === 'gu' ? 'પગલાં ગણતરી ફક્ત ફોનના મોશન સેન્સર દ્વારા જ માન્ય છે!' : 'Step counting is only supported on mobile devices via sensor synchronization!', 'error');
   }
 }
 
-/**
- * Open a manual step entry modal for web users
- */
-function openManualStepEntryModal() {
-  const existing = document.getElementById('manualStepModal');
-  if (existing) existing.remove();
-
-  // Get today's already-logged baseline
-  const currentSteps = _liveStepCount || 0;
-
-  const modal = document.createElement('div');
-  modal.id = 'manualStepModal';
-  modal.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.75);backdrop-filter:blur(6px);display:flex;align-items:flex-end;justify-content:center;padding:0;';
-  modal.innerHTML = `
-    <div style="background:var(--bg-card);border-radius:20px 20px 0 0;padding:28px 20px 36px;width:100%;max-width:600px;animation:slideUp 0.3s ease;">
-      <div style="width:40px;height:4px;background:var(--border-color);border-radius:2px;margin:0 auto 20px;"></div>
-      <div style="font-size:20px;font-weight:800;color:var(--text-primary);margin-bottom:6px;">👣 ${t('enterRealSteps')}</div>
-      <div style="font-size:13px;color:var(--text-secondary);margin-bottom:20px;line-height:1.5;">
-        ${t('enterRealStepsDesc')}
-      </div>
-      <div style="background:var(--bg-glass-light);border:1px solid var(--border-color);border-radius:12px;padding:14px 16px;margin-bottom:16px;display:flex;align-items:center;gap:10px;">
-        <span style="font-size:24px;">📱</span>
-        <div>
-          <div style="font-size:11px;color:var(--text-secondary);font-weight:600;">CURRENT LOGGED STEPS TODAY</div>
-          <div style="font-size:18px;font-weight:800;color:var(--primary);">${currentSteps.toLocaleString()} steps</div>
-        </div>
-      </div>
-      <div class="form-group">
-        <label class="form-label" style="font-size:13px;font-weight:700;">Enter Step Count from Health App:</label>
-        <input type="number" id="manualStepInput" class="form-input" min="0" max="100000"
-          placeholder="e.g. 4500"
-          style="font-size:22px;font-weight:800;text-align:center;padding:16px;letter-spacing:2px;"
-        >
-      </div>
-      <div id="manualStepError" style="display:none;color:var(--danger);font-size:12px;margin-bottom:12px;font-weight:600;"></div>
-      <div style="display:flex;gap:10px;">
-        <button onclick="submitManualSteps()" id="manualStepSubmitBtn" class="btn btn-primary" style="flex:1;font-weight:800;padding:14px;font-size:15px;">
-          ✅ ${t('logSteps')}
-        </button>
-        <button onclick="document.getElementById('manualStepModal').remove()" class="btn btn-outline" style="flex:0 0 auto;padding:14px 16px;">
-          Cancel
-        </button>
-      </div>
-    </div>
-  `;
-  document.body.appendChild(modal);
-  modal.addEventListener('click', (e) => { if (e.target === modal) modal.remove(); });
-  setTimeout(() => { document.getElementById('manualStepInput')?.focus(); }, 300);
-}
-
-async function submitManualSteps() {
-  const input = document.getElementById('manualStepInput');
-  const errorEl = document.getElementById('manualStepError');
-  const submitBtn = document.getElementById('manualStepSubmitBtn');
-  if (!input) return;
-
-  const steps = parseInt(input.value);
-  if (isNaN(steps) || steps < 0) {
-    errorEl.style.display = 'block';
-    errorEl.textContent = 'Please enter a valid step count (0 or more).';
-    return;
-  }
-  if (steps > 100000) {
-    errorEl.style.display = 'block';
-    errorEl.textContent = 'Step count seems too high. Please check and try again.';
-    return;
-  }
-
-  errorEl.style.display = 'none';
-  submitBtn.disabled = true;
-  submitBtn.textContent = '⏳ Logging...';
-
-  try {
-    // Update live step count to match manual entry
-    _liveStepCount = steps;
-    _lastSyncedSteps = 0; // Force sync even if same value
-    await autoSyncStepsToBackend();
-    document.getElementById('manualStepModal')?.remove();
-    showToast(`✅ ${steps.toLocaleString()} ${t('steps')} ${t('logged')}!`, 'success');
-    if (currentPage === 'dashboard') {
-      renderDashboard(document.getElementById('pageContainer'));
-    } else if (currentPage === 'activity') {
-      loadActivityData();
-    }
-  } catch (error) {
-    errorEl.style.display = 'block';
-    errorEl.textContent = error.message || 'Failed to log steps. Please try again.';
-    submitBtn.disabled = false;
-    submitBtn.textContent = '✅ Log Steps';
-  }
-}
+// openManualStepEntryModal and submitManualSteps functions removed to prevent leaderboard cheating.
 
 
 /**
@@ -717,9 +619,6 @@ async function renderActivity(container) {
           </p>
           <button class="btn btn-primary sync-btn" onclick="handleSyncSteps()" style="margin: 0 auto; display: flex; align-items: center; gap: 8px;">
             <span>🔄</span> ${t('syncSteps')}
-          </button>
-          <button class="btn-link" onclick="openManualStepEntryModal()" style="background:none; border:none; color:var(--primary); font-size:12px; margin-top:12px; cursor:pointer; text-decoration:underline; display:block; margin: 8px auto 0;">
-            ${t('manualEntry')}
           </button>
         </div>
       </div>
