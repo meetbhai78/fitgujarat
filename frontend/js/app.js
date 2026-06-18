@@ -876,12 +876,29 @@ async function loadLeaderboard() {
 
     // Podium (top 3)
     const top3 = rankings.slice(0, 3);
-    const podiumOrder = top3.length >= 3 ? [top3[1], top3[0], top3[2]] : top3;
+    
+    // Explicitly determine the podium visual order and rank mapping based on how many people are in top3
+    let podiumOrder = [];
+    if (top3.length === 1) {
+      podiumOrder = [{ entry: top3[0], rank: 1 }];
+    } else if (top3.length === 2) {
+      podiumOrder = [
+        { entry: top3[1], rank: 2 },
+        { entry: top3[0], rank: 1 }
+      ];
+    } else if (top3.length >= 3) {
+      podiumOrder = [
+        { entry: top3[1], rank: 2 },
+        { entry: top3[0], rank: 1 },
+        { entry: top3[2], rank: 3 }
+      ];
+    }
+    
     const valueLabel = lbType === 'streak' ? '🔥 days' : lbType === 'peak_day' ? '⚡ pts' : 'pts';
 
     let podiumHtml = '<div class="podium">';
-    podiumOrder.forEach((entry, i) => {
-      const actualRank = i === 0 ? 2 : i === 1 ? 1 : 3;
+    podiumOrder.forEach(({ entry, rank }) => {
+      const actualRank = rank;
       const rankClass = `rank-${actualRank}`;
       const isYou = entry.user_id === data.userId;
       const avatarContent = entry.profile_photo_url
