@@ -99,12 +99,7 @@ function showReferralDownloadOverlay(code) {
 
     // 2. Trigger direct APK download
     const downloadUrl = `${window.location.origin}/app.apk`;
-    const link = document.createElement('a');
-    link.href = downloadUrl;
-    link.download = 'GujaratStepCounter.apk';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    window.location.href = downloadUrl;
 
     // Update button text
     const btn = document.getElementById('downloadCopyBtn');
@@ -119,12 +114,7 @@ function showReferralDownloadOverlay(code) {
   // Auto trigger download after 1 second
   setTimeout(() => {
     const downloadUrl = `${window.location.origin}/app.apk`;
-    const link = document.createElement('a');
-    link.href = downloadUrl;
-    link.download = 'GujaratStepCounter.apk';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    window.location.href = downloadUrl;
   }, 1000);
 }
 

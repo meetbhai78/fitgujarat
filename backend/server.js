@@ -24,6 +24,19 @@ app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
+// Serve APK download directly with correct content headers
+app.get('/app.apk', (req, res) => {
+  const apkPath = path.join(__dirname, '..', 'frontend', 'app.apk');
+  res.download(apkPath, 'GujaratStepCounter.apk', (err) => {
+    if (err) {
+      console.error('Error serving app.apk:', err);
+      if (!res.headersSent) {
+        res.status(404).send('APK file not found. Please compile the app first.');
+      }
+    }
+  });
+});
+
 // Serve frontend static files
 app.use(express.static(path.join(__dirname, '..', 'frontend')));
 
