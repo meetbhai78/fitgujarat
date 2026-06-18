@@ -172,7 +172,15 @@ router.post('/:id/media', auth, upload.single('media'), async (req, res) => {
       // Upload to Cloudinary
       const uploadResult = await uploadToCloudinary(req.file.buffer, req.file.mimetype);
       
-      post.media_url = uploadResult.secure_url;
+      // Generate signed URL to work with strict transformations
+      const signedUrl = cloudinary.url(uploadResult.public_id, {
+        secure: true,
+        sign_url: true,
+        resource_type: uploadResult.resource_type,
+        format: uploadResult.format
+      });
+
+      post.media_url = signedUrl;
       post.media_type = isImage ? 'image' : 'audio';
       post.approval_status = 'pending'; // needs admin approval after media upload
     }

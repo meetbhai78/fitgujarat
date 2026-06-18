@@ -254,13 +254,22 @@ router.post('/profile/photo', auth, upload.single('photo'), async (req, res) => 
       stream.end(req.file.buffer);
     });
 
+    const signedUrl = cloudinary.url(uploadResult.public_id, {
+      secure: true,
+      sign_url: true,
+      format: uploadResult.format,
+      transformation: [
+        { width: 400, height: 400, crop: 'fill', gravity: 'face' }
+      ]
+    });
+
     const user = await User.findByIdAndUpdate(
       req.userId,
-      { profile_photo_url: uploadResult.secure_url },
+      { profile_photo_url: signedUrl },
       { new: true }
     ).select('-password_hash');
 
-    res.json({ message: 'Profile photo updated.', profile_photo_url: uploadResult.secure_url, user });
+    res.json({ message: 'Profile photo updated.', profile_photo_url: signedUrl, user });
   } catch (error) {
     console.error('Profile photo upload error:', error);
     res.status(500).json({ error: 'Failed to upload photo.' });
