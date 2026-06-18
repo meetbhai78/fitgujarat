@@ -370,6 +370,9 @@ async function renderDashboard(container) {
         <button class="sync-btn" onclick="handleSyncSteps()">
           <span>🔄</span> ${t('syncSteps')}
         </button>
+        <button class="btn-link" onclick="openManualStepEntryModal()" style="background:none; border:none; color:var(--primary); font-size:12px; margin-top:8px; cursor:pointer; text-decoration:underline;">
+          ${t('manualEntry')}
+        </button>
       </div>
     `;
 
@@ -483,6 +486,9 @@ async function loadDashboardData(user) {
         <button class="sync-btn" onclick="handleSyncSteps()" style="margin-top:16px;">
           <span>🔄</span> ${t('syncSteps')}
         </button>
+        <button class="btn-link" onclick="openManualStepEntryModal()" style="background:none; border:none; color:var(--primary); font-size:12px; margin-top:8px; cursor:pointer; text-decoration:underline; display:block; margin-left:auto; margin-right:auto;">
+          ${t('manualEntry')}
+        </button>
       `;
     }
 
@@ -543,6 +549,7 @@ async function handleSyncSteps() {
       }
     } catch (error) {
       showToast(error.message || 'Sync failed', 'error');
+      openManualStepEntryModal();
     } finally {
       if (syncBtn) {
         syncBtn.disabled = false;
@@ -710,6 +717,9 @@ async function renderActivity(container) {
           </p>
           <button class="btn btn-primary sync-btn" onclick="handleSyncSteps()" style="margin: 0 auto; display: flex; align-items: center; gap: 8px;">
             <span>🔄</span> ${t('syncSteps')}
+          </button>
+          <button class="btn-link" onclick="openManualStepEntryModal()" style="background:none; border:none; color:var(--primary); font-size:12px; margin-top:12px; cursor:pointer; text-decoration:underline; display:block; margin: 8px auto 0;">
+            ${t('manualEntry')}
           </button>
         </div>
       </div>
