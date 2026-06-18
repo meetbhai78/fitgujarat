@@ -2,15 +2,126 @@
 // Gujarat Step Counter - Main App & Router
 // ========================================
 
-// Parse and store referral code from URL parameter
+// Parse and store referral code from URL parameter and display download overlay for mobile web users
 (function() {
   const urlParams = new URLSearchParams(window.location.search);
   const refCode = urlParams.get('ref');
   if (refCode) {
     localStorage.setItem('referred_by_code', refCode.trim().toLowerCase());
     console.log('Captured referral code:', refCode.trim().toLowerCase());
+    
+    // If not a native app, show a premium glassmorphic referral download prompt
+    if (typeof isNativeApp === 'function' && !isNativeApp()) {
+      window.addEventListener('DOMContentLoaded', () => {
+        showReferralDownloadOverlay(refCode.trim());
+      });
+    }
   }
 })();
+
+/**
+ * Show a premium glassmorphic landing overlay to guide referred users to download the native app
+ */
+function showReferralDownloadOverlay(code) {
+  const existing = document.getElementById('referralLandingOverlay');
+  if (existing) existing.remove();
+
+  const overlay = document.createElement('div');
+  overlay.id = 'referralLandingOverlay';
+  overlay.style.cssText = 'position:fixed;inset:0;z-index:100000;background:rgba(7,9,14,0.92);backdrop-filter:blur(12px);display:flex;align-items:center;justify-content:center;padding:20px;';
+  
+  const styleEl = document.createElement('style');
+  styleEl.innerHTML = `
+    @keyframes pulseScale {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+    .landing-logo {
+      font-size: 64px;
+      animation: pulseScale 2s infinite ease-in-out;
+    }
+  `;
+  document.head.appendChild(styleEl);
+
+  const cleanCode = code.toUpperCase();
+  const isGu = (typeof currentLang !== 'undefined' && currentLang === 'gu');
+
+  overlay.innerHTML = `
+    <div class="card" style="width:100%;max-width:440px;background:var(--gradient-card);border:1px solid rgba(255,255,255,0.1);padding:32px 24px;text-align:center;box-shadow:var(--shadow-lg);border-radius:24px;">
+      <div class="landing-logo" style="margin-bottom:16px;">🎁</div>
+      <h2 style="font-size:24px;font-weight:900;background:var(--gradient-hero);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:12px;line-height:1.3;">
+        ${isGu ? 'ગુજરાત સ્ટેપ કાઉન્ટર' : 'Gujarat Step Counter'}
+      </h2>
+      <p style="font-size:15px;color:var(--text-primary);margin-bottom:20px;line-height:1.5;font-weight:500;">
+        ${isGu 
+          ? 'તમને ગુજરાત સ્ટેપ કાઉન્ટરમાં જોડાવા માટે આમંત્રિત કર્યા છે! દરરોજ ચાલો, સ્પર્ધા કરો અને આકર્ષક ઇનામો જીતો.' 
+          : 'You have been invited to join Gujarat Step Counter! Walk daily, compete, and win exciting prizes.'}
+      </p>
+      
+      <div style="background:rgba(255,107,53,0.08);border:1px dashed var(--primary);border-radius:16px;padding:16px;margin-bottom:24px;">
+        <div style="font-size:11px;color:var(--text-secondary);font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">
+          ${isGu ? 'રેફરલ કોડ (નોંધણી વખતે ઉપયોગ કરો)' : 'REFERRAL CODE (USE ON SIGNUP)'}
+        </div>
+        <div style="font-size:28px;font-weight:900;color:var(--primary-light);letter-spacing:1px;">${cleanCode}</div>
+      </div>
+
+      <button id="downloadCopyBtn" class="btn btn-primary btn-full btn-lg" style="margin-bottom:16px;font-weight:800;gap:8px;box-shadow:0 6px 20px rgba(255,107,53,0.4);">
+        📥 ${isGu ? 'એપ ડાઉનલોડ કરો અને કોડ કોપી કરો' : 'Download App & Copy Code'}
+      </button>
+
+      <button id="continueWebBtn" style="background:none;border:none;color:var(--text-secondary);font-size:13px;text-decoration:underline;cursor:pointer;font-weight:600;display:block;margin:0 auto;">
+        ${isGu ? 'વેબ ડેમો સંસ્કરણ પર આગળ વધો' : 'Continue to Web Demo Version'}
+      </button>
+    </div>
+  `;
+
+  document.body.appendChild(overlay);
+
+  document.getElementById('downloadCopyBtn').addEventListener('click', async () => {
+    // 1. Copy code to clipboard
+    try {
+      await navigator.clipboard.writeText(cleanCode);
+      if (typeof showToast === 'function') {
+        showToast(
+          isGu 
+            ? 'રેફરલ કોડ કોપી થયો! એપ ખોલો અને નોંધણી વખતે પેસ્ટ કરો.' 
+            : 'Referral code copied! Open the app and paste it during registration.', 
+          'success'
+        );
+      }
+    } catch (err) {
+      console.warn('Could not copy to clipboard automatically', err);
+    }
+
+    // 2. Trigger direct APK download
+    const downloadUrl = `${window.location.origin}/app.apk`;
+    const link = document.createElement('a');
+    link.href = downloadUrl;
+    link.download = 'GujaratStepCounter.apk';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    // Update button text
+    const btn = document.getElementById('downloadCopyBtn');
+    btn.innerHTML = `🔄 ${isGu ? 'ડાઉનલોડ શરૂ થઈ રહ્યું છે...' : 'Downloading App...'}`;
+    btn.disabled = true;
+    
+    // Add manual helper link in case download is blocked
+    const helperText = document.createElement('div');
+    helperText.style.cssText = 'font-size:12px;color:var(--text-secondary);margin-top:10px;line-height:1.4;';
+    helperText.innerHTML = isGu 
+      ? `ડાઉનલોડ શરૂ ન થાય તો, <a href="${downloadUrl}" download style="color:var(--primary-light);text-decoration:underline;font-weight:700;">અહીં ક્લિક કરો</a>`
+      : `If the download did not start, <a href="${downloadUrl}" download style="color:var(--primary-light);text-decoration:underline;font-weight:700;">click here</a>`;
+    btn.parentNode.insertBefore(helperText, btn.nextSibling);
+  });
+
+  document.getElementById('continueWebBtn').addEventListener('click', () => {
+    overlay.remove();
+  });
+}
+
 
 let currentPage = 'splash';
 let aiChatHistory = [];

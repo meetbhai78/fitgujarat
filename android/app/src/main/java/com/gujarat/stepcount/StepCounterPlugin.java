@@ -12,12 +12,21 @@ import com.getcapacitor.Plugin;
 import com.getcapacitor.PluginCall;
 import com.getcapacitor.PluginMethod;
 import com.getcapacitor.annotation.CapacitorPlugin;
+import com.getcapacitor.annotation.Permission;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
-@CapacitorPlugin(name = "StepCounter")
+@CapacitorPlugin(
+    name = "StepCounter",
+    permissions = {
+        @Permission(
+            alias = "activityRecognition",
+            strings = { android.Manifest.permission.ACTIVITY_RECOGNITION }
+        )
+    }
+)
 public class StepCounterPlugin extends Plugin implements SensorEventListener {
 
     private SensorManager sensorManager;
@@ -33,7 +42,7 @@ public class StepCounterPlugin extends Plugin implements SensorEventListener {
     private String lastDate = "";
 
     // Accelerometer algorithm parameters (MotionMate style peak-detection fallback)
-    private static final float STEP_THRESHOLD = 11.8f;  // Acceleration magnitude threshold (approx 1.2g)
+    private static final float STEP_THRESHOLD = 11.2f;  // Acceleration magnitude threshold (approx 1.15g)
     private static final int DEBOUNCE_MS = 330;         // Debounce time in ms to avoid double-counting
     private long lastStepTimeNs = 0;
 
