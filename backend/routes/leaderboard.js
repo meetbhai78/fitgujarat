@@ -23,19 +23,7 @@ router.get('/district/:district/:type', auth, async (req, res) => {
     }
 
     const leaderboard = await getLeaderboard(district, type);
-    if (leaderboard) {
-      await leaderboard.populate('rankings.user_id', 'name profile_photo_url district');
-      // Map it to flatten user_id fields
-      leaderboard.rankings = leaderboard.rankings.map(r => ({
-        user_id: r.user_id._id,
-        name: r.user_id.name,
-        profile_photo_url: r.user_id.profile_photo_url,
-        district: r.user_id.district,
-        value: r.value,
-        secondary_value: r.secondary_value,
-        rank: r.rank
-      }));
-    }
+
 
     // Find user's position
     const userRank = await getUserRank(req.userId, district, type);
@@ -64,18 +52,7 @@ router.get('/state/:type', auth, async (req, res) => {
     }
 
     const leaderboard = await getLeaderboard('STATE', type);
-    if (leaderboard) {
-      await leaderboard.populate('rankings.user_id', 'name profile_photo_url district');
-      // Map it to flatten user_id fields
-      leaderboard.rankings = leaderboard.rankings.map(r => ({
-        user_id: r.user_id._id,
-        name: r.user_id.name,
-        profile_photo_url: r.user_id.profile_photo_url,
-        district: r.user_id.district,
-        value: r.value,
-        rank: r.rank
-      }));
-    }
+
 
     // Find user's position
     const userRank = await getUserRank(req.userId, 'STATE', type);

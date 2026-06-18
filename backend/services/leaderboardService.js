@@ -181,6 +181,7 @@ async function getLeaderboard(district, type, cycleStart, cycleEnd) {
     populatedRankings.push({
       user_id: entry.user_id,
       value: entry.value,
+      secondary_value: entry.secondary_value,
       rank: entry.rank,
       name: user?.name || 'Unknown',
       district: user?.district || '',
