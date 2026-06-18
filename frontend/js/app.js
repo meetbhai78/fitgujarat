@@ -812,7 +812,10 @@ async function loadLeaderboard() {
           ${!isYou ? `<button class="report-btn" onclick="openReportModal('${entry.user_id}','${(entry.name||'User').replace(/'/g,"\\'")}')" title="Report user" style="position:absolute; top:-10px; right:-10px; z-index:10;">🚩</button>` : ''}
           <div class="user-avatar ${actualRank===1?'lg':'md'} ${rankClass}" style="margin:0 auto 6px; ${isYou?'outline:2px solid var(--primary);':''}">${avatarContent}</div>
           <div class="podium-name" ${isYou ? 'style="color:var(--primary);"' : ''}>${entry.name || 'User'}</div>
-          <div class="podium-score">${formatNumber(entry.value)}</div>
+          <div class="podium-score" style="line-height:1.2;">
+            <div>${formatNumber(entry.value)} <span style="font-size:10px;font-weight:400;opacity:0.8;">pts</span></div>
+            ${entry.secondary_value !== undefined ? `<div style="font-size:11px;color:var(--text-muted);font-weight:500;">${entry.secondary_value.toLocaleString()} 👣</div>` : ''}
+          </div>
           <div class="podium-bar">${actualRank}</div>
         </div>
       `;
@@ -835,7 +838,10 @@ async function loadLeaderboard() {
             <div class="rank-name">${entry.name || 'User'}</div>
             <div class="rank-district">${getDistrictName(entry.district || '')}</div>
           </div>
-          <div class="rank-value">${formatNumber(entry.value)}</div>
+          <div class="rank-value" style="display:flex;flex-direction:column;align-items:flex-end;line-height:1.2;">
+            <div>${formatNumber(entry.value)} <span style="font-size:10px;font-weight:400;color:var(--text-muted);">pts</span></div>
+            ${entry.secondary_value !== undefined ? `<div style="font-size:11px;color:var(--text-muted);font-weight:500;">${entry.secondary_value.toLocaleString()} 👣</div>` : ''}
+          </div>
           ${!isYou ? `<button class="report-btn" onclick="openReportModal('${entry.user_id}','${(entry.name||'User').replace(/'/g,"\\'")}')" title="Report user">🚩</button>` : ''}
         </div>
       `;

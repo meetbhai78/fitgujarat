@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const rankingEntrySchema = new mongoose.Schema({
   user_id: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   value: { type: Number, default: 0 },
+  secondary_value: { type: Number },
   rank: { type: Number, default: 0 }
 }, { _id: false });
 

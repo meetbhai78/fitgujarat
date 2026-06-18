@@ -32,6 +32,7 @@ router.get('/district/:district/:type', auth, async (req, res) => {
         profile_photo_url: r.user_id.profile_photo_url,
         district: r.user_id.district,
         value: r.value,
+        secondary_value: r.secondary_value,
         rank: r.rank
       }));
     }

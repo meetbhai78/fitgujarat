@@ -44,7 +44,8 @@ async function computeOverallLeaderboard(district, cycleStart, cycleEnd) {
     {
       $group: {
         _id: '$user_id',
-        totalScore: { $sum: '$calculated_score' }
+        totalScore: { $sum: '$calculated_score' },
+        totalSteps: { $sum: '$raw_value' }
       }
     },
     { $sort: { totalScore: -1 } },
@@ -55,6 +56,7 @@ async function computeOverallLeaderboard(district, cycleStart, cycleEnd) {
   const rankings = results.map((r, i) => ({
     user_id: r._id,
     value: r.totalScore,
+    secondary_value: r.totalSteps,
     rank: i + 1
   }));
 
