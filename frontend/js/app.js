@@ -2,6 +2,16 @@
 // Gujarat Step Counter - Main App & Router
 // ========================================
 
+// Parse and store referral code from URL parameter
+(function() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const refCode = urlParams.get('ref');
+  if (refCode) {
+    localStorage.setItem('referred_by_code', refCode.trim().toLowerCase());
+    console.log('Captured referral code:', refCode.trim().toLowerCase());
+  }
+})();
+
 let currentPage = 'splash';
 let aiChatHistory = [];
 let leaderboardSubView = 'standings';
@@ -246,6 +256,10 @@ function renderRegister(container) {
               ${districtOptions}
             </select>
           </div>
+          <div class="form-group">
+            <label class="form-label">${t('referralCode')} (${t('optional')})</label>
+            <input type="text" class="form-input" id="regReferralCode" placeholder="e.g. amit1234" value="${localStorage.getItem('referred_by_code') || ''}">
+          </div>
           <button type="submit" class="btn btn-primary btn-full btn-lg" id="regBtn">${t('register')}</button>
         </form>
 
@@ -275,12 +289,14 @@ async function handleRegister(e) {
   btn.textContent = t('loading');
 
   try {
+    const referralCodeVal = document.getElementById('regReferralCode').value.trim();
     const data = {
       name: document.getElementById('regName').value.trim(),
       email: document.getElementById('regEmail').value.trim() || undefined,
       phone: document.getElementById('regPhone').value.trim() || undefined,
       password: document.getElementById('regPassword').value,
-      district: document.getElementById('regDistrict').value
+      district: document.getElementById('regDistrict').value,
+      referredByCode: referralCodeVal || undefined
     };
 
     if (!data.email && !data.phone) {
@@ -290,6 +306,7 @@ async function handleRegister(e) {
     const result = await api.register(data);
     api.setToken(result.token);
     setUser(result.user);
+    localStorage.removeItem('referred_by_code');
     showToast(t('registerSuccess'));
     
     await loadUserProfile();
@@ -819,6 +836,7 @@ async function renderLeaderboardSubView() {
         <button class="lb-tab ${lbType==='overall'?'active':''}" onclick="switchLBType('overall')">${t('overallScore')}</button>
         <button class="lb-tab ${lbType==='streak'?'active':''}" onclick="switchLBType('streak')">${t('streakLB')}</button>
         <button class="lb-tab ${lbType==='peak_day'?'active':''}" onclick="switchLBType('peak_day')">${t('peakDay')}</button>
+        <button class="lb-tab ${lbType==='referral'?'active':''}" onclick="switchLBType('referral')">${t('referralLeaderboard')}</button>
       </div>
 
       <div class="level-toggle">
@@ -894,7 +912,7 @@ async function loadLeaderboard() {
       ];
     }
     
-    const valueLabel = lbType === 'streak' ? '🔥 days' : lbType === 'peak_day' ? '⚡ pts' : 'pts';
+    const valueLabel = lbType === 'streak' ? '🔥 days' : lbType === 'peak_day' ? '⚡ pts' : lbType === 'referral' ? 'pts' : 'pts';
 
     let podiumHtml = '<div class="podium">';
     podiumOrder.forEach(({ entry, rank }) => {
@@ -904,6 +922,7 @@ async function loadLeaderboard() {
       const avatarContent = entry.profile_photo_url
         ? `<img src="${entry.profile_photo_url}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`
         : `<span style="font-weight:800;font-size:${actualRank===1?'20px':'16px'}">${getInitials(entry.name)}</span>`;
+      const secondaryLabel = lbType === 'referral' ? (currentLang === 'gu' ? 'રેફરલ્સ' : 'referrals') : '👣';
       podiumHtml += `
         <div class="podium-item" style="position:relative;">
           ${!isYou ? `<button class="report-btn" onclick="openReportModal('${entry.user_id}','${(entry.name||'User').replace(/'/g,"\\'")}')" title="Report user" style="position:absolute; top:-10px; right:-10px; z-index:10;">🚩</button>` : ''}
@@ -911,7 +930,7 @@ async function loadLeaderboard() {
           <div class="podium-name" ${isYou ? 'style="color:var(--primary);"' : ''}>${entry.name || 'User'}</div>
           <div class="podium-score" style="line-height:1.2;">
             <div>${formatNumber(entry.value)} <span style="font-size:10px;font-weight:400;opacity:0.8;">${valueLabel}</span></div>
-            ${entry.secondary_value !== undefined && entry.secondary_value > 0 ? `<div style="font-size:11px;color:var(--text-muted);font-weight:500;">${entry.secondary_value.toLocaleString()} 👣</div>` : ''}
+            ${entry.secondary_value !== undefined && (entry.secondary_value > 0 || lbType === 'referral') ? `<div style="font-size:11px;color:var(--text-muted);font-weight:500;">${entry.secondary_value.toLocaleString()} ${secondaryLabel}</div>` : ''}
           </div>
           <div class="podium-bar">${actualRank}</div>
         </div>
@@ -936,7 +955,7 @@ async function loadLeaderboard() {
           </div>
           <div class="rank-value" style="display:flex;flex-direction:column;align-items:flex-end;line-height:1.2;">
             <div>${formatNumber(entry.value)} <span style="font-size:10px;font-weight:400;color:var(--text-muted);">${valueLabel}</span></div>
-            ${entry.secondary_value !== undefined && entry.secondary_value > 0 ? `<div style="font-size:11px;color:var(--text-muted);font-weight:500;">${entry.secondary_value.toLocaleString()} 👣</div>` : ''}
+            ${entry.secondary_value !== undefined && (entry.secondary_value > 0 || lbType === 'referral') ? `<div style="font-size:11px;color:var(--text-muted);font-weight:500;">${entry.secondary_value.toLocaleString()} ${lbType === 'referral' ? (currentLang === 'gu' ? 'રેફરલ્સ' : 'referrals') : '👣'}</div>` : ''}
           </div>
           ${!isYou ? `<button class="report-btn" onclick="openReportModal('${entry.user_id}','${(entry.name||'User').replace(/'/g,"\\'")}')" title="Report user">🚩</button>` : ''}
         </div>
@@ -1420,6 +1439,47 @@ async function renderProfile(container) {
         </div>
       </div>
 
+      <!-- Referral Program -->
+      <div class="card">
+        <div class="section-title"><span class="title-icon">👥</span> ${t('referralProgram')}</div>
+        <div style="background:var(--bg-glass-light); border:1px solid var(--border-color); border-radius:12px; padding:16px; margin-bottom:16px;">
+          <div style="font-size:12px; color:var(--text-secondary); font-weight:600; margin-bottom:4px; text-transform:uppercase;">
+            ${currentLang === 'gu' ? 'તમારો રેફરલ કોડ' : 'Your Referral Code'}
+          </div>
+          <div style="display:flex; justify-content:space-between; align-items:center; background:var(--bg-card); border:1px dashed var(--primary); border-radius:8px; padding:8px 12px; margin-bottom:12px;">
+            <span style="font-size:18px; font-weight:800; color:var(--primary); font-family:monospace; letter-spacing:1px;">${user.referral_code || '-'}</span>
+            <button class="sort-pill" onclick="shareReferralLink('${user.referral_code}')" style="margin:0; border-color:var(--primary); color:var(--primary); font-weight:700;">
+              🔗 ${t('shareReferralLink')}
+            </button>
+          </div>
+          <p style="font-size:11px; color:var(--text-secondary); margin:0; line-height:1.4;">
+            ${currentLang === 'gu' ? 'મિત્રોને આમંત્રિત કરો! જ્યારે તેઓ તમારા કોડ સાથે સાઇન અપ કરશે ત્યારે તમને ૧૦૦ પોઈન્ટ્સ મળશે.' : 'Invite friends! Get 100 points when they sign up with your referral code.'}
+          </p>
+        </div>
+        
+        <div class="stat-grid" style="grid-template-columns: repeat(2, 1fr); margin-bottom:12px;">
+          <div class="stat-card" style="--stat-color: var(--success);">
+            <div class="stat-value" id="profileReferralsCount">${user.referral_count || 0}</div>
+            <div class="stat-label">${t('myReferrals')}</div>
+          </div>
+          <div class="stat-card" style="--stat-color: var(--accent);">
+            <div class="stat-value" id="profileReferralPoints">${user.referral_points || 0}</div>
+            <div class="stat-label">${t('referralPoints')}</div>
+          </div>
+        </div>
+
+        <div class="stat-grid" style="grid-template-columns: repeat(2, 1fr);">
+          <div class="stat-card" style="--stat-color: var(--info);">
+            <div class="stat-value" id="profileReferralDistrictRank">-</div>
+            <div class="stat-label">${t('districtRank')}</div>
+          </div>
+          <div class="stat-card" style="--stat-color: var(--warning);">
+            <div class="stat-value" id="profileReferralStateRank">-</div>
+            <div class="stat-label">${t('stateRank')}</div>
+          </div>
+        </div>
+      </div>
+
       <!-- AI Recommendations -->
       <div class="card">
         <div class="section-title"><span class="title-icon">🤖</span> ${t('recommendations')}</div>
@@ -1470,6 +1530,21 @@ async function renderProfile(container) {
   }
 
   initAIChatBox();
+
+  // Load referral ranks dynamically
+  try {
+    api.getDistrictLeaderboard(user.district, 'referral').then(distRefLB => {
+      const rankEl = document.getElementById('profileReferralDistrictRank');
+      if (rankEl) rankEl.textContent = distRefLB.userRank ? `#${distRefLB.userRank}` : '-';
+    }).catch(() => {});
+
+    api.getStateLeaderboard('referral').then(stateRefLB => {
+      const rankEl = document.getElementById('profileReferralStateRank');
+      if (rankEl) rankEl.textContent = stateRefLB.userRank ? `#${stateRefLB.userRank}` : '-';
+    }).catch(() => {});
+  } catch (err) {
+    console.warn('Failed to load referral ranks:', err);
+  }
 }
 
 function toggleProfileEdit() {
@@ -3132,4 +3207,30 @@ function initAIChatBox() {
     `;
   }
   chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+// ---- Referral Share Helper ----
+function shareReferralLink(code) {
+  if (!code) return;
+  const inviteLink = isNativeApp() 
+    ? `https://fitgujarat.onrender.com/?ref=${code}` 
+    : `${window.location.origin}/?ref=${code}`;
+  
+  if (navigator.share) {
+    navigator.share({
+      title: t('appName'),
+      text: currentLang === 'gu' 
+        ? `ગુજરાત સ્ટેપ કાઉન્ટર પર મારી સાથે જોડાઓ! મારા રેફરલ કોડ ${code} નો ઉપયોગ કરો અથવા અહીં સાઇન અપ કરો:` 
+        : `Join me on Gujarat Step Counter! Use my referral code ${code} or sign up here:`,
+      url: inviteLink
+    }).catch(err => console.log('Share failed:', err));
+  } else {
+    // Copy to clipboard fallback
+    navigator.clipboard.writeText(inviteLink).then(() => {
+      showToast(currentLang === 'gu' ? 'રેફરલ લિંક ક્લિપબોર્ડ પર કોપી કરી!' : 'Referral link copied to clipboard!');
+    }).catch(err => {
+      console.error('Clipboard copy failed:', err);
+      showToast('Failed to copy link', 'error');
+    });
+  }
 }

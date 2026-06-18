@@ -24,7 +24,7 @@ const router = express.Router();
  */
 router.post('/register', async (req, res) => {
   try {
-    const { name, email, phone, password, district } = req.body;
+    const { name, email, phone, password, district, referredByCode } = req.body;
 
     // Validate required fields
     if (!name || !password || !district) {
@@ -50,6 +50,15 @@ router.post('/register', async (req, res) => {
       if (existingPhone) return res.status(400).json({ error: 'Phone already registered.' });
     }
 
+    // Validate referredByCode if provided
+    let referredByUser = null;
+    if (referredByCode) {
+      referredByUser = await User.findOne({ referral_code: referredByCode.trim().toLowerCase() });
+      if (!referredByUser) {
+        return res.status(400).json({ error: 'Invalid referral code.' });
+      }
+    }
+
     // Hash password
     const salt = await bcrypt.genSalt(10);
     const password_hash = await bcrypt.hash(password, salt);
@@ -61,8 +70,16 @@ router.post('/register', async (req, res) => {
       phone: phone || undefined,
       password_hash,
       district,
-      state: 'Gujarat'
+      state: 'Gujarat',
+      referred_by: referredByUser ? referredByUser._id : null
     });
+
+    // Award referral points to the referrer
+    if (referredByUser) {
+      referredByUser.referral_points = (referredByUser.referral_points || 0) + 100;
+      referredByUser.referral_count = (referredByUser.referral_count || 0) + 1;
+      await referredByUser.save();
+    }
 
     // Create initial streak record
     await UserStreak.create({
@@ -90,7 +107,10 @@ router.post('/register', async (req, res) => {
         district: user.district,
         state: user.state,
         role: user.role,
-        preferred_language: user.preferred_language
+        preferred_language: user.preferred_language,
+        referral_code: user.referral_code,
+        referral_points: user.referral_points,
+        referral_count: user.referral_count
       }
     });
   } catch (error) {
@@ -148,7 +168,10 @@ router.post('/login', async (req, res) => {
         state: user.state,
         role: user.role,
         preferred_language: user.preferred_language,
-        profile_photo_url: user.profile_photo_url
+        profile_photo_url: user.profile_photo_url,
+        referral_code: user.referral_code,
+        referral_points: user.referral_points,
+        referral_count: user.referral_count
       }
     });
   } catch (error) {

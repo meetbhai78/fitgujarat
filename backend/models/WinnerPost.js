@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const winnerPostSchema = new mongoose.Schema({
   level: { type: String, enum: ['district', 'state'], required: true },
   district: { type: String, default: null }, // null if level=state
-  category: { type: String, enum: ['top_scorer', 'streak_leader', 'peak_performer'], required: true },
+  category: { type: String, enum: ['top_scorer', 'streak_leader', 'peak_performer', 'top_referrer'], required: true },
   user_id: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   value: { type: Number, required: true },
   badge_card_url: { type: String, default: '' },

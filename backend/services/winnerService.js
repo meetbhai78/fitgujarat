@@ -10,11 +10,12 @@ const { computeLeaderboards, getMonthStart, getMonthEnd } = require('./leaderboa
  * State Winners:   Monthly (1st–last day cycle)
  */
 
-const CATEGORIES = ['top_scorer', 'streak_leader', 'peak_performer'];
+const CATEGORIES = ['top_scorer', 'streak_leader', 'peak_performer', 'top_referrer'];
 const TYPE_MAP = {
   top_scorer: 'overall',
   streak_leader: 'streak',
-  peak_performer: 'peak_day'
+  peak_performer: 'peak_day',
+  top_referrer: 'referral'
 };
 
 // ─── Date helpers ──────────────────────────────────────────────────────────
@@ -228,7 +229,8 @@ async function getWinnersHistory(level, district, adminView = false) {
 const CATEGORY_LABELS = {
   top_scorer:    { en: 'Top Scorer',     gu: 'ટોપ સ્કોરર',      emoji: '🏆' },
   streak_leader: { en: 'Streak Leader',  gu: 'સ્ટ્રીક લીડર',    emoji: '🔥' },
-  peak_performer:{ en: 'Peak Performer', gu: 'પીક પર્ફોર્મર',   emoji: '⚡' }
+  peak_performer:{ en: 'Peak Performer', gu: 'પીક પર્ફોર્મર',   emoji: '⚡' },
+  top_referrer:  { en: 'Top Referrer',   gu: 'ટોપ રેફરર',      emoji: '👥' }
 };
 
 function generateWinnerCardData(post, user) {

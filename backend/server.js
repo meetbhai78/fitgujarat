@@ -64,6 +64,30 @@ async function startServer() {
   try {
     await connectDB();
 
+    // Run migration: Generate referral codes for any existing users
+    try {
+      const User = require('./models/User');
+      const usersWithoutRef = await User.find({
+        $or: [
+          { referral_code: { $exists: false } },
+          { referral_code: null },
+          { referral_code: '' }
+        ]
+      });
+      if (usersWithoutRef.length > 0) {
+        console.log(`⚡ [Migration] Found ${usersWithoutRef.length} users without referral codes. Generating...`);
+        for (const u of usersWithoutRef) {
+          const cleanName = u.name.toLowerCase().replace(/[^a-z0-9]/g, '').substring(0, 5);
+          const randomNum = Math.floor(1000 + Math.random() * 9000);
+          u.referral_code = `${cleanName || 'user'}${randomNum}`;
+          await u.save();
+        }
+        console.log(`✅ [Migration] Referral codes generated for ${usersWithoutRef.length} users.`);
+      }
+    } catch (migError) {
+      console.error('❌ [Migration] Referral code migration failed:', migError);
+    }
+
     // Initialize cron jobs
     initCronJobs();
 

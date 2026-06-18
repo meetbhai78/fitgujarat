@@ -67,6 +67,14 @@ const i18n = {
     enterRealStepsDesc: 'Enter the step count shown on your phone\'s health app or pedometer',
     logSteps: 'Log Steps',
     logged: 'logged',
+    referralLeaderboard: 'Referral Leaderboard',
+    referralCode: 'Referral Code',
+    optional: 'Optional',
+    myReferrals: 'My Referrals',
+    referralPoints: 'Referral Points',
+    shareReferralLink: 'Share Link',
+    top_referrer: 'Top Referrer',
+    referralProgram: 'Referral Program',
   },
   gu: {
     appName: 'ગુજરાત સ્ટેપ કાઉન્ટર',
@@ -131,6 +139,14 @@ const i18n = {
     enterRealStepsDesc: 'તમારા ફોનની હેલ્થ એપ અથવા પેડોમીટર પર દેખાતી સ્ટેપ સંખ્યા દાખલ કરો',
     logSteps: 'પગલાં લોગ કરો',
     logged: 'લોગ થયા',
+    referralLeaderboard: 'રેફરલ લીડરબોર્ડ',
+    referralCode: 'રેફરલ કોડ',
+    optional: 'વૈકલ્પિક',
+    myReferrals: 'મારા રેફરલ્સ',
+    referralPoints: 'રેફરલ પોઈન્ટ',
+    shareReferralLink: 'લિંક શેર કરો',
+    top_referrer: 'ટોપ રેફરર',
+    referralProgram: 'રેફરલ પ્રોગ્રામ',
   }
 };
 
@@ -303,7 +319,8 @@ function getCategoryLabel(category) {
   const labels = {
     top_scorer: { en: 'Top Scorer', gu: 'ટોપ સ્કોરર', emoji: '🏆' },
     streak_leader: { en: 'Streak Leader', gu: 'સ્ટ્રીક લીડર', emoji: '🔥' },
-    peak_performer: { en: 'Peak Performer', gu: 'પીક પર્ફોર્મર', emoji: '⚡' }
+    peak_performer: { en: 'Peak Performer', gu: 'પીક પર્ફોર્મર', emoji: '⚡' },
+    top_referrer: { en: 'Top Referrer', gu: 'ટોપ રેફરર', emoji: '👥' }
   };
   const l = labels[category] || labels.top_scorer;
   return { text: currentLang === 'gu' ? l.gu : l.en, emoji: l.emoji };

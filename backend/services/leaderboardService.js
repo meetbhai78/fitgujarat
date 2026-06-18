@@ -15,6 +15,7 @@ async function computeLeaderboards(cycleStart, cycleEnd) {
     await computeOverallLeaderboard(district, cycleStart, cycleEnd);
     await computeStreakLeaderboard(district, cycleStart, cycleEnd);
     await computePeakDayLeaderboard(district, cycleStart, cycleEnd);
+    await computeReferralLeaderboard(district, cycleStart, cycleEnd);
   }
 }
 
@@ -175,6 +176,7 @@ async function getLeaderboard(district, type, cycleStart, cycleEnd) {
     if (type === 'overall') await computeOverallLeaderboard(district, start, end);
     else if (type === 'streak') await computeStreakLeaderboard(district, start, end);
     else if (type === 'peak_day') await computePeakDayLeaderboard(district, start, end);
+    else if (type === 'referral') await computeReferralLeaderboard(district, start, end);
 
     leaderboard = await Leaderboard.findOne({
       district, type, cycle_start: start, cycle_end: end
@@ -253,8 +255,73 @@ function formatDate(date) {
   return date.toISOString().split('T')[0];
 }
 
+/**
+ * Referral Leaderboard
+ * Cumulative referral points earned during the cycle (100 pts per referred signup)
+ */
+async function computeReferralLeaderboard(district, cycleStart, cycleEnd) {
+  const pipeline = [
+    {
+      $match: {
+        referred_by: { $ne: null },
+        created_at: { $gte: cycleStart, $lte: cycleEnd }
+      }
+    },
+    {
+      $group: {
+        _id: '$referred_by',
+        referralCount: { $sum: 1 }
+      }
+    },
+    {
+      $lookup: {
+        from: 'users',
+        localField: '_id',
+        foreignField: '_id',
+        as: 'referrer'
+      }
+    },
+    { $unwind: '$referrer' },
+    // Filter by referrer's district if not STATE
+    ...(district !== 'STATE' ? [{ $match: { 'referrer.district': district } }] : []),
+    // Only count active, non-hidden regular users
+    {
+      $match: {
+        'referrer.role': 'user',
+        'referrer.is_hidden': { $ne: true }
+      }
+    },
+    {
+      $project: {
+        _id: 1,
+        totalReferrals: '$referralCount',
+        totalPoints: { $multiply: ['$referralCount', 100] }
+      }
+    },
+    { $sort: { totalPoints: -1 } },
+    { $limit: 100 }
+  ];
+
+  const results = await User.aggregate(pipeline);
+  const rankings = results.map((r, i) => ({
+    user_id: r._id,
+    value: r.totalPoints,
+    secondary_value: r.totalReferrals,
+    rank: i + 1
+  }));
+
+  await Leaderboard.findOneAndUpdate(
+    { district, type: 'referral', cycle_start: cycleStart, cycle_end: cycleEnd },
+    { rankings, updated_at: new Date() },
+    { upsert: true, new: true }
+  );
+
+  return rankings;
+}
+
 module.exports = {
   computeLeaderboards,
+  computeReferralLeaderboard,
   getLeaderboard,
   getUserRank,
   getMonthStart,

@@ -14,11 +14,20 @@ const userSchema = new mongoose.Schema({
   preferred_language: { type: String, enum: ['en', 'gu'], default: 'en' },
   created_at: { type: Date, default: Date.now },
   frozen_until: { type: Date, default: null },
-  is_hidden: { type: Boolean, default: false }
+  is_hidden: { type: Boolean, default: false },
+  referral_code: { type: String, unique: true, sparse: true, lowercase: true, trim: true },
+  referred_by: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
+  referral_points: { type: Number, default: 0 },
+  referral_count: { type: Number, default: 0 }
 });
 
-// Ensure at least email or phone is provided
+// Ensure at least email or phone is provided, and generate referral code if missing
 userSchema.pre('validate', function(next) {
+  if (!this.referral_code) {
+    const cleanName = this.name.toLowerCase().replace(/[^a-z0-9]/g, '').substring(0, 5);
+    const randomNum = Math.floor(1000 + Math.random() * 9000);
+    this.referral_code = `${cleanName || 'user'}${randomNum}`;
+  }
   if (!this.email && !this.phone) {
     return next(new Error('Either email or phone is required'));
   }

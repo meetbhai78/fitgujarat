@@ -18,7 +18,7 @@ router.get('/district/:district/:type', auth, async (req, res) => {
       return res.status(403).json({ error: 'You can only view your own district leaderboard.' });
     }
 
-    if (!['overall', 'streak', 'peak_day'].includes(type)) {
+    if (!['overall', 'streak', 'peak_day', 'referral'].includes(type)) {
       return res.status(400).json({ error: 'Invalid leaderboard type.' });
     }
 
@@ -47,7 +47,7 @@ router.get('/state/:type', auth, async (req, res) => {
   try {
     const { type } = req.params;
 
-    if (!['overall', 'streak', 'peak_day'].includes(type)) {
+    if (!['overall', 'streak', 'peak_day', 'referral'].includes(type)) {
       return res.status(400).json({ error: 'Invalid leaderboard type.' });
     }
 

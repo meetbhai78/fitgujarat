@@ -9,7 +9,7 @@ const rankingEntrySchema = new mongoose.Schema({
 
 const leaderboardSchema = new mongoose.Schema({
   district: { type: String, required: true }, // district name or "STATE"
-  type: { type: String, enum: ['overall', 'streak', 'peak_day'], required: true },
+  type: { type: String, enum: ['overall', 'streak', 'peak_day', 'referral'], required: true },
   cycle_start: { type: Date, required: true },
   cycle_end: { type: Date, required: true },
   rankings: [rankingEntrySchema],
