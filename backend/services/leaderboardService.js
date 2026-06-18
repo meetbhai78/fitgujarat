@@ -86,9 +86,18 @@ async function computeStreakLeaderboard(district, cycleStart, cycleEnd) {
     .sort({ current_streak: -1 })
     .limit(100);
 
+  // Get total steps for each user to show as secondary value
+  const stepTotals = await ActivityLog.aggregate([
+    { $match: { user_id: { $in: userIds }, is_flagged: false } },
+    { $group: { _id: '$user_id', totalSteps: { $sum: '$raw_value' } } }
+  ]);
+  const stepMap = {};
+  stepTotals.forEach(s => { stepMap[s._id.toString()] = s.totalSteps; });
+
   const rankings = streaks.map((s, i) => ({
     user_id: s.user_id,
     value: s.current_streak,
+    secondary_value: stepMap[s.user_id.toString()] || 0,
     rank: i + 1
   }));
 

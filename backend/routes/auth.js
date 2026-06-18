@@ -245,31 +245,25 @@ router.post('/profile/photo', auth, upload.single('photo'), async (req, res) => 
   try {
     if (!req.file) return res.status(400).json({ error: 'No file uploaded.' });
 
-    // Upload to cloudinary
+    // Upload to cloudinary — no transformation to avoid strict transformations block
     const uploadResult = await new Promise((resolve, reject) => {
       const stream = cloudinary.uploader.upload_stream(
-        { folder: 'stepcount/avatars', transformation: [{ width: 400, height: 400, crop: 'fill', gravity: 'face' }] },
+        { folder: 'stepcount/avatars' },
         (error, result) => { if (error) reject(error); else resolve(result); }
       );
       stream.end(req.file.buffer);
     });
 
-    const signedUrl = cloudinary.url(uploadResult.public_id, {
-      secure: true,
-      sign_url: true,
-      format: uploadResult.format,
-      transformation: [
-        { width: 400, height: 400, crop: 'fill', gravity: 'face' }
-      ]
-    });
+    // Use the plain secure_url (no transformation) — works with strict transformations enabled
+    const photoUrl = uploadResult.secure_url;
 
     const user = await User.findByIdAndUpdate(
       req.userId,
-      { profile_photo_url: signedUrl },
+      { profile_photo_url: photoUrl },
       { new: true }
     ).select('-password_hash');
 
-    res.json({ message: 'Profile photo updated.', profile_photo_url: signedUrl, user });
+    res.json({ message: 'Profile photo updated.', profile_photo_url: photoUrl, user });
   } catch (error) {
     console.error('Profile photo upload error:', error);
     res.status(500).json({ error: 'Failed to upload photo.' });

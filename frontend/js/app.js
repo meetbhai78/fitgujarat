@@ -798,7 +798,8 @@ async function loadLeaderboard() {
     // Podium (top 3)
     const top3 = rankings.slice(0, 3);
     const podiumOrder = top3.length >= 3 ? [top3[1], top3[0], top3[2]] : top3;
-    
+    const valueLabel = lbType === 'streak' ? '🔥 days' : lbType === 'peak_day' ? '⚡ pts' : 'pts';
+
     let podiumHtml = '<div class="podium">';
     podiumOrder.forEach((entry, i) => {
       const actualRank = i === 0 ? 2 : i === 1 ? 1 : 3;
@@ -813,8 +814,8 @@ async function loadLeaderboard() {
           <div class="user-avatar ${actualRank===1?'lg':'md'} ${rankClass}" style="margin:0 auto 6px; ${isYou?'outline:2px solid var(--primary);':''}">${avatarContent}</div>
           <div class="podium-name" ${isYou ? 'style="color:var(--primary);"' : ''}>${entry.name || 'User'}</div>
           <div class="podium-score" style="line-height:1.2;">
-            <div>${formatNumber(entry.value)} <span style="font-size:10px;font-weight:400;opacity:0.8;">pts</span></div>
-            ${entry.secondary_value !== undefined ? `<div style="font-size:11px;color:var(--text-muted);font-weight:500;">${entry.secondary_value.toLocaleString()} 👣</div>` : ''}
+            <div>${formatNumber(entry.value)} <span style="font-size:10px;font-weight:400;opacity:0.8;">${valueLabel}</span></div>
+            ${entry.secondary_value !== undefined && entry.secondary_value > 0 ? `<div style="font-size:11px;color:var(--text-muted);font-weight:500;">${entry.secondary_value.toLocaleString()} 👣</div>` : ''}
           </div>
           <div class="podium-bar">${actualRank}</div>
         </div>
@@ -823,7 +824,6 @@ async function loadLeaderboard() {
     podiumHtml += '</div>';
 
     // Rank list (4+)
-    const currentUser = getUser();
     let listHtml = '<div class="rank-list">';
     rankings.slice(3).forEach(entry => {
       const isYou = entry.user_id === data.userId;
@@ -839,8 +839,8 @@ async function loadLeaderboard() {
             <div class="rank-district">${getDistrictName(entry.district || '')}</div>
           </div>
           <div class="rank-value" style="display:flex;flex-direction:column;align-items:flex-end;line-height:1.2;">
-            <div>${formatNumber(entry.value)} <span style="font-size:10px;font-weight:400;color:var(--text-muted);">pts</span></div>
-            ${entry.secondary_value !== undefined ? `<div style="font-size:11px;color:var(--text-muted);font-weight:500;">${entry.secondary_value.toLocaleString()} 👣</div>` : ''}
+            <div>${formatNumber(entry.value)} <span style="font-size:10px;font-weight:400;color:var(--text-muted);">${valueLabel}</span></div>
+            ${entry.secondary_value !== undefined && entry.secondary_value > 0 ? `<div style="font-size:11px;color:var(--text-muted);font-weight:500;">${entry.secondary_value.toLocaleString()} 👣</div>` : ''}
           </div>
           ${!isYou ? `<button class="report-btn" onclick="openReportModal('${entry.user_id}','${(entry.name||'User').replace(/'/g,"\\'")}')" title="Report user">🚩</button>` : ''}
         </div>
