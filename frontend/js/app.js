@@ -28,7 +28,7 @@ function showReferralDownloadOverlay(code) {
 
   const overlay = document.createElement('div');
   overlay.id = 'referralLandingOverlay';
-  overlay.style.cssText = 'position:fixed;inset:0;z-index:100000;background:rgba(7,9,14,0.92);backdrop-filter:blur(12px);display:flex;align-items:center;justify-content:center;padding:20px;';
+  overlay.style.cssText = 'position:fixed;inset:0;z-index:100000;background:rgba(7,9,14,0.95);backdrop-filter:blur(15px);display:flex;align-items:center;justify-content:center;padding:20px;';
   
   const styleEl = document.createElement('style');
   styleEl.innerHTML = `
@@ -55,38 +55,41 @@ function showReferralDownloadOverlay(code) {
       </h2>
       <p style="font-size:15px;color:var(--text-primary);margin-bottom:20px;line-height:1.5;font-weight:500;">
         ${isGu 
-          ? 'તમને ગુજરાત સ્ટેપ કાઉન્ટરમાં જોડાવા માટે આમંત્રિત કર્યા છે! દરરોજ ચાલો, સ્પર્ધા કરો અને આકર્ષક ઇનામો જીતો.' 
-          : 'You have been invited to join Gujarat Step Counter! Walk daily, compete, and win exciting prizes.'}
+          ? 'તમને ગુજરાત સ્ટેપ કાઉન્ટરમાં જોડાવા માટે આમંત્રિત કર્યા છે! એપ ડાઉનલોડ કરો અને તમારા ૨૦૦ બોનસ પોઇન્ટ મેળવવા માટે રેફરલ કોડનો ઉપયોગ કરો.' 
+          : 'You have been invited to join Gujarat Step Counter! Download the app and use the referral code to get your bonus points.'}
       </p>
       
       <div style="background:rgba(255,107,53,0.08);border:1px dashed var(--primary);border-radius:16px;padding:16px;margin-bottom:24px;">
         <div style="font-size:11px;color:var(--text-secondary);font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">
-          ${isGu ? 'રેફરલ કોડ (નોંધણી વખતે ઉપયોગ કરો)' : 'REFERRAL CODE (USE ON SIGNUP)'}
+          ${isGu ? 'રેફરલ કોડ (નોંધણી વખતે ઓટોમેટીક દાખલ થશે)' : 'REFERRAL CODE (AUTO-FILLS ON SIGNUP)'}
         </div>
         <div style="font-size:28px;font-weight:900;color:var(--primary-light);letter-spacing:1px;">${cleanCode}</div>
       </div>
 
-      <button id="downloadCopyBtn" class="btn btn-primary btn-full btn-lg" style="margin-bottom:16px;font-weight:800;gap:8px;box-shadow:0 6px 20px rgba(255,107,53,0.4);">
-        📥 ${isGu ? 'એપ ડાઉનલોડ કરો અને કોડ કોપી કરો' : 'Download App & Copy Code'}
+      <button id="downloadCopyBtn" class="btn btn-primary btn-full btn-lg" style="margin-bottom:12px;font-weight:800;gap:8px;box-shadow:0 6px 20px rgba(255,107,53,0.4);">
+        📥 ${isGu ? 'એપ ડાઉનલોડ કરો' : 'Download Android App'}
       </button>
 
-      <button id="continueWebBtn" style="background:none;border:none;color:var(--text-secondary);font-size:13px;text-decoration:underline;cursor:pointer;font-weight:600;display:block;margin:0 auto;">
-        ${isGu ? 'વેબ ડેમો સંસ્કરણ પર આગળ વધો' : 'Continue to Web Demo Version'}
-      </button>
+      <div id="statusText" style="font-size:12px;color:var(--text-secondary);margin-top:10px;line-height:1.4;">
+        ${isGu 
+          ? 'ડાઉનલોડ આપમેળે શરૂ થશે. જો ન થાય, તો બટન દબાવો.' 
+          : 'Download will start automatically. If it does not, press the button.'}
+      </div>
     </div>
   `;
 
   document.body.appendChild(overlay);
 
-  document.getElementById('downloadCopyBtn').addEventListener('click', async () => {
+  // Trigger function for copying and downloading
+  const triggerDownloadAndCopy = async () => {
     // 1. Copy code to clipboard
     try {
       await navigator.clipboard.writeText(cleanCode);
       if (typeof showToast === 'function') {
         showToast(
           isGu 
-            ? 'રેફરલ કોડ કોપી થયો! એપ ખોલો અને નોંધણી વખતે પેસ્ટ કરો.' 
-            : 'Referral code copied! Open the app and paste it during registration.', 
+            ? 'રેફરલ કોડ કોपी થયો! નોંધણી વખતે તે આપમેળે ભરાઈ જશે.' 
+            : 'Referral code copied! It will auto-fill during registration.', 
           'success'
         );
       }
@@ -105,22 +108,57 @@ function showReferralDownloadOverlay(code) {
 
     // Update button text
     const btn = document.getElementById('downloadCopyBtn');
-    btn.innerHTML = `🔄 ${isGu ? 'ડાઉનલોડ શરૂ થઈ રહ્યું છે...' : 'Downloading App...'}`;
-    btn.disabled = true;
-    
-    // Add manual helper link in case download is blocked
-    const helperText = document.createElement('div');
-    helperText.style.cssText = 'font-size:12px;color:var(--text-secondary);margin-top:10px;line-height:1.4;';
-    helperText.innerHTML = isGu 
-      ? `ડાઉનલોડ શરૂ ન થાય તો, <a href="${downloadUrl}" download style="color:var(--primary-light);text-decoration:underline;font-weight:700;">અહીં ક્લિક કરો</a>`
-      : `If the download did not start, <a href="${downloadUrl}" download style="color:var(--primary-light);text-decoration:underline;font-weight:700;">click here</a>`;
-    btn.parentNode.insertBefore(helperText, btn.nextSibling);
-  });
+    if (btn) {
+      btn.innerHTML = `🔄 ${isGu ? 'ડાઉનલોડ શરૂ થઈ રહ્યું છે...' : 'Downloading App...'}`;
+    }
+  };
 
-  document.getElementById('continueWebBtn').addEventListener('click', () => {
-    overlay.remove();
-  });
+  // Add event listener to button
+  document.getElementById('downloadCopyBtn').addEventListener('click', triggerDownloadAndCopy);
+
+  // Auto trigger download after 1 second
+  setTimeout(() => {
+    const downloadUrl = `${window.location.origin}/app.apk`;
+    const link = document.createElement('a');
+    link.href = downloadUrl;
+    link.download = 'GujaratStepCounter.apk';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }, 1000);
 }
+
+/**
+ * Attempt to auto-fill the referral code input field on the registration screen by reading the system clipboard.
+ */
+function tryAutoFillReferralFromClipboard() {
+  if (navigator.clipboard && navigator.clipboard.readText) {
+    navigator.clipboard.readText().then(text => {
+      if (text) {
+        const cleanText = text.trim();
+        // Alphanumeric validation of referral code format (3-15 chars)
+        if (/^[a-zA-Z0-9_]{3,15}$/.test(cleanText)) {
+          const input = document.getElementById('regReferralCode');
+          if (input && !input.value) {
+            input.value = cleanText.toLowerCase();
+            localStorage.setItem('referred_by_code', cleanText.toLowerCase());
+            
+            const isGu = (typeof currentLang !== 'undefined' && currentLang === 'gu');
+            showToast(
+              isGu 
+                ? `ક્લિપબોર્ડમાંથી રેફરલ કોડ '${cleanText}' આપમેળે ભરાઈ ગયો!` 
+                : `Referral code '${cleanText}' auto-filled from clipboard!`, 
+              'success'
+            );
+          }
+        }
+      }
+    }).catch(err => {
+      console.log('Clipboard read permission was skipped or denied:', err);
+    });
+  }
+}
+
 
 
 let currentPage = 'splash';
@@ -391,6 +429,9 @@ function renderRegister(container) {
       </div>
     </div>
   `;
+
+  // Attempt to auto-fill the referral code from the system clipboard
+  setTimeout(tryAutoFillReferralFromClipboard, 300);
 }
 
 async function handleRegister(e) {
