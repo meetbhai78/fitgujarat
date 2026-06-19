@@ -164,6 +164,9 @@ function navigate(page) {
   currentPage = page;
   window.location.hash = page;
   renderPage(page);
+  if (typeof AdManager !== 'undefined') {
+    AdManager.handleNavigation();
+  }
 }
 
 function renderCurrentPage() {
@@ -680,6 +683,9 @@ async function handleSyncSteps() {
       const syncResult = await forceSync();
       if (syncResult.success) {
         showToast(`${syncResult.steps.toLocaleString()} ${t('steps')} ${t('logged')}!`);
+        if (typeof AdManager !== 'undefined') {
+          setTimeout(() => { AdManager.handleSync(); }, 800);
+        }
       } else {
         throw new Error(syncResult.reason || 'Failed to read sensor');
       }

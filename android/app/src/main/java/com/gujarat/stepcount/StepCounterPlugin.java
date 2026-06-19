@@ -1,11 +1,14 @@
 package com.gujarat.stepcount;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.hardware.Sensor;
-import android.hardware.SensorEvent;
-import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.os.Build;
+import android.util.Log;
 
 import com.getcapacitor.JSObject;
 import com.getcapacitor.Plugin;
@@ -27,75 +30,114 @@ import java.util.Locale;
         )
     }
 )
-public class StepCounterPlugin extends Plugin implements SensorEventListener {
+public class StepCounterPlugin extends Plugin {
+    private static final String TAG = "StepCounterPlugin";
 
+    private boolean isTracking = false;
+    private boolean isAccelerometerFallback = false;
     private SensorManager sensorManager;
     private Sensor stepSensor;
     private Sensor accelerometerSensor;
-    private boolean isTracking = false;
-    private boolean isAccelerometerFallback = false;
 
-    // Step tracking state
-    private float totalStepsSinceReboot = 0;
-    private float baselineSteps = -1;     // steps at midnight / first reading
+    // Step tracking state cached in plugin
     private int todaySteps = 0;
     private String lastDate = "";
 
-    // Accelerometer algorithm parameters (MotionMate style peak-detection fallback)
-    private static final float STEP_THRESHOLD = 11.2f;  // Acceleration magnitude threshold (approx 1.15g)
-    private static final int DEBOUNCE_MS = 330;         // Debounce time in ms to avoid double-counting
-    private long lastStepTimeNs = 0;
-
     private static final String PREFS_NAME = "StepCounterPrefs";
-    private static final String KEY_BASELINE = "baseline_steps";
     private static final String KEY_DATE = "baseline_date";
     private static final String KEY_TODAY_STEPS = "today_steps";
+    private static final String KEY_TRACKING_ENABLED = "is_tracking_enabled";
+
+    private final BroadcastReceiver stepReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (StepCounterService.ACTION_STEP_UPDATE.equals(intent.getAction())) {
+                int steps = intent.getIntExtra(StepCounterService.EXTRA_STEPS, 0);
+                String date = intent.getStringExtra(StepCounterService.EXTRA_DATE);
+                todaySteps = steps;
+                lastDate = date;
+                Log.d(TAG, "Broadcast received: " + steps + " steps on date " + date);
+                sendStepUpdate(steps, date);
+            }
+        }
+    };
 
     @Override
     public void load() {
+        super.load();
+        Log.d(TAG, "StepCounterPlugin load");
+        
         sensorManager = (SensorManager) getContext().getSystemService(Context.SENSOR_SERVICE);
         stepSensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER);
-        
         if (stepSensor == null) {
-            // Fall back to accelerometer sensor if step counter sensor is missing
             accelerometerSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
             isAccelerometerFallback = true;
         }
-        
-        restoreState();
-    }
 
-    /**
-     * Start tracking steps from the hardware sensor or accelerometer fallback
-     */
-    @PluginMethod()
-    public void startTracking(PluginCall call) {
-        Sensor activeSensor = isAccelerometerFallback ? accelerometerSensor : stepSensor;
-        
-        if (activeSensor == null) {
-            call.reject("Neither Step Counter nor Accelerometer sensor is available on this device");
-            return;
+        restoreState();
+
+        // Register receiver for background service updates
+        IntentFilter filter = new IntentFilter(StepCounterService.ACTION_STEP_UPDATE);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            getContext().registerReceiver(stepReceiver, filter, Context.RECEIVER_NOT_EXPORTED);
+        } else {
+            getContext().registerReceiver(stepReceiver, filter);
         }
 
+        // If tracking should be active, start/ensure service is running
+        SharedPreferences prefs = getContext().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        boolean isEnabled = prefs.getBoolean(KEY_TRACKING_ENABLED, false);
+        if (isEnabled) {
+            Log.d(TAG, "Tracking was enabled, ensuring StepCounterService is running.");
+            startService();
+            isTracking = true;
+        }
+    }
+
+    private void startService() {
+        Context context = getContext();
+        Intent serviceIntent = new Intent(context, StepCounterService.class);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            context.startForegroundService(serviceIntent);
+        } else {
+            context.startService(serviceIntent);
+        }
+        
+        // Save state so receiver knows to start it on boot
+        SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        prefs.edit().putBoolean(KEY_TRACKING_ENABLED, true).apply();
+    }
+
+    private void stopService() {
+        Context context = getContext();
+        Intent serviceIntent = new Intent(context, StepCounterService.class);
+        context.stopService(serviceIntent);
+
+        // Save state
+        SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        prefs.edit().putBoolean(KEY_TRACKING_ENABLED, false).apply();
+    }
+
+    @PluginMethod()
+    public void startTracking(PluginCall call) {
+        Log.d(TAG, "startTracking command received.");
         if (!isTracking) {
-            sensorManager.registerListener(this, activeSensor, SensorManager.SENSOR_DELAY_UI);
+            startService();
             isTracking = true;
         }
 
         JSObject ret = new JSObject();
         ret.put("started", true);
-        ret.put("hasSensor", !isAccelerometerFallback);
+        ret.put("hasSensor", !isAccelerometerFallback && stepSensor != null);
         ret.put("isAccelerometerFallback", isAccelerometerFallback);
         call.resolve(ret);
     }
 
-    /**
-     * Stop tracking steps
-     */
     @PluginMethod()
     public void stopTracking(PluginCall call) {
+        Log.d(TAG, "stopTracking command received.");
         if (isTracking) {
-            sensorManager.unregisterListener(this);
+            stopService();
             isTracking = false;
         }
         JSObject ret = new JSObject();
@@ -103,94 +145,26 @@ public class StepCounterPlugin extends Plugin implements SensorEventListener {
         call.resolve(ret);
     }
 
-    /**
-     * Get the current step count for today
-     */
     @PluginMethod()
     public void getStepCount(PluginCall call) {
+        // Read fresh count from SharedPreferences in case service updated it in background
+        restoreState();
+
         JSObject ret = new JSObject();
         ret.put("steps", todaySteps);
         ret.put("hasSensor", !isAccelerometerFallback && stepSensor != null);
         ret.put("isAccelerometerFallback", isAccelerometerFallback);
         ret.put("isTracking", isTracking);
-        ret.put("date", getTodayDate());
+        ret.put("date", lastDate);
         call.resolve(ret);
     }
 
-    /**
-     * Check if hardware step sensor is available (or if we have accelerometer fallback)
-     */
     @PluginMethod()
     public void isAvailable(PluginCall call) {
         JSObject ret = new JSObject();
-        // Available if either hardware step counter or accelerometer fallback is present
         ret.put("available", stepSensor != null || accelerometerSensor != null);
         ret.put("isAccelerometerFallback", isAccelerometerFallback);
         call.resolve(ret);
-    }
-
-    @Override
-    public void onSensorChanged(SensorEvent event) {
-        String today = getTodayDate();
-
-        // Check if date changed (midnight transition)
-        if (!today.equals(lastDate)) {
-            if (!isAccelerometerFallback) {
-                baselineSteps = totalStepsSinceReboot;
-            }
-            lastDate = today;
-            todaySteps = 0;
-            saveState();
-        }
-
-        if (event.sensor.getType() == Sensor.TYPE_STEP_COUNTER) {
-            totalStepsSinceReboot = event.values[0];
-
-            // First reading ever — set baseline
-            if (baselineSteps < 0) {
-                baselineSteps = totalStepsSinceReboot;
-                lastDate = today;
-            }
-
-            // Calculate today's steps
-            todaySteps = Math.max(0, (int)(totalStepsSinceReboot - baselineSteps));
-            saveState();
-
-            // Notify listeners
-            sendStepUpdate(todaySteps, today);
-
-        } else if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
-            // Read x, y, z values
-            float x = event.values[0];
-            float y = event.values[1];
-            float z = event.values[2];
-
-            // Calculate total acceleration magnitude (vector length)
-            float magnitude = (float) Math.sqrt(x * x + y * y + z * z);
-            long currentTimeNs = event.timestamp;
-
-            // Simple peak detection: magnitude exceeds the threshold
-            if (magnitude > STEP_THRESHOLD) {
-                // Convert nanoseconds to milliseconds to check the debounce window
-                long timeDiffMs = (currentTimeNs - lastStepTimeNs) / 1000000;
-                
-                if (timeDiffMs > DEBOUNCE_MS) {
-                    todaySteps++;
-                    lastStepTimeNs = currentTimeNs;
-                    saveState();
-                    sendStepUpdate(todaySteps, today);
-                }
-            }
-        }
-    }
-
-    @Override
-    public void onAccuracyChanged(Sensor sensor, int accuracy) {
-        // Not used
-    }
-
-    private String getTodayDate() {
-        return new SimpleDateFormat("yyyy-MM-dd", Locale.US).format(new Date());
     }
 
     private void sendStepUpdate(int steps, String date) {
@@ -200,30 +174,28 @@ public class StepCounterPlugin extends Plugin implements SensorEventListener {
         notifyListeners("stepUpdate", data);
     }
 
-    private void saveState() {
-        SharedPreferences prefs = getContext().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
-        prefs.edit()
-            .putFloat(KEY_BASELINE, baselineSteps)
-            .putString(KEY_DATE, lastDate)
-            .putInt(KEY_TODAY_STEPS, todaySteps)
-            .apply();
-    }
-
     private void restoreState() {
         SharedPreferences prefs = getContext().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
         String savedDate = prefs.getString(KEY_DATE, "");
-        String today = getTodayDate();
+        String today = new SimpleDateFormat("yyyy-MM-dd", Locale.US).format(new Date());
 
         if (today.equals(savedDate)) {
-            baselineSteps = prefs.getFloat(KEY_BASELINE, -1);
             lastDate = savedDate;
             todaySteps = prefs.getInt(KEY_TODAY_STEPS, 0);
         } else {
-            // New day — reset values
-            baselineSteps = -1;
             lastDate = today;
             todaySteps = 0;
-            saveState();
         }
+    }
+
+    @Override
+    protected void handleOnDestroy() {
+        try {
+            getContext().unregisterReceiver(stepReceiver);
+            Log.d(TAG, "Unregistered stepReceiver broadcast receiver.");
+        } catch (Exception e) {
+            Log.w(TAG, "Error unregistering receiver: " + e.getMessage());
+        }
+        super.handleOnDestroy();
     }
 }
