@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <meta name="description" content="Gujarat Step Counter - Walk. Compete. Win. District-level step count leaderboard competition for Gujarat.">
+  <meta name="description" content="Fit Gujarat - Walk. Compete. Win. District-level step count leaderboard competition for Gujarat.">
   <meta name="theme-color" content="#0A0E17">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <title>Gujarat Step Counter | ગુજરાત સ્ટેપ કાઉન્ટર</title>
+  <title>Fit Gujarat | ફિટ ગુજરાત</title>
   <link rel="stylesheet" href="css/index.css">
 </head>
 <body>
@@ -16,8 +16,13 @@
     <!-- Top Navigation -->
     <nav class="top-nav" id="topNav" style="display:none;">
       <div class="logo">
-        <div class="logo-icon">🏃</div>
-        <span class="logo-text" data-i18n="appName">Gujarat Step Counter</span>
+        <div class="logo-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width: 22px; height: 22px;">
+            <path d="M3 10h4l2.5-3h4.5l1.5 2h5.5l.5 2v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-6z"/>
+            <path d="M10 14h4M7 17h10"/>
+          </svg>
+        </div>
+        <span class="logo-text" data-i18n="appName">Fit Gujarat</span>
       </div>
       <div class="nav-actions">
         <button id="themeToggleBtn" onclick="toggleTheme()" style="background:none;border:none;font-size:20px;cursor:pointer;padding:8px;margin-right:8px;display:flex;align-items:center;justify-content:center;color:var(--text-primary);">☀️</button>
@@ -37,19 +42,37 @@
     <!-- Bottom Tab Bar -->
     <nav class="bottom-bar" id="bottomBar" style="display:none;">
       <button class="tab-btn active" data-page="dashboard" onclick="navigate('dashboard')">
-        <span class="tab-icon">🏠</span>
+        <span class="tab-icon">
+          <svg class="tab-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+            <polyline points="9 22 9 12 15 12 15 22"/>
+          </svg>
+        </span>
         <span data-i18n="home">Home</span>
       </button>
       <button class="tab-btn" data-page="activity" onclick="navigate('activity')">
-        <span class="tab-icon">📊</span>
+        <span class="tab-icon">
+          <svg class="tab-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>
+          </svg>
+        </span>
         <span data-i18n="activity">Activity</span>
       </button>
       <button class="tab-btn" data-page="leaderboard" onclick="navigate('leaderboard')">
-        <span class="tab-icon">🏆</span>
+        <span class="tab-icon">
+          <svg class="tab-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6M18 9h1.5a2.5 2.5 0 0 0 0-5H18M4 22h16M10 14.66V17c0 .55-.45 1-1 1H4v2h16v-2h-5c-.55 0-1-.45-1-1v-2.34M12 2a4 4 0 0 1 4 4v3H8V6a4 4 0 0 1 4-4z"/>
+          </svg>
+        </span>
         <span data-i18n="leaderboard">Leaderboard</span>
       </button>
       <button class="tab-btn" data-page="profile" onclick="navigate('profile')">
-        <span class="tab-icon">👤</span>
+        <span class="tab-icon">
+          <svg class="tab-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+            <circle cx="12" cy="7" r="4"/>
+          </svg>
+        </span>
         <span data-i18n="profile">Profile</span>
       </button>
     </nav>

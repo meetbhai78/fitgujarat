@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">Gujarat Step Counter</string>
-    <string name="title_activity_main">Gujarat Step Counter</string>
+    <string name="app_name">Fit Gujarat</string>
+    <string name="title_activity_main">Fit Gujarat</string>
     <string name="package_name">com.gujarat.stepcount</string>
     <string name="custom_url_scheme">com.gujarat.stepcount</string>
 </resources>

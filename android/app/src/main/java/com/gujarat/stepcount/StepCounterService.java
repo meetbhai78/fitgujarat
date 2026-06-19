@@ -176,7 +176,7 @@ public class StepCounterService extends Service implements SensorEventListener {
         );
 
         String stepsStr = String.format(Locale.US, "%,d", steps);
-        String title = "Gujarat Step Counter";
+        String title = "Fit Gujarat";
         String text = "Today's steps: " + stepsStr;
 
         // Use custom drawable if available, otherwise fallback to standard compass/info drawable

@@ -2,7 +2,7 @@
 const translations = {
   en: {
     // App
-    appName: 'Gujarat Step Counter',
+    appName: 'Fit Gujarat',
     appTagline: 'Walk. Compete. Win.',
     
     // Auth
@@ -133,7 +133,7 @@ const translations = {
   
   gu: {
     // App
-    appName: 'ગુજરાત સ્ટેપ કાઉન્ટર',
+    appName: 'ફિટ ગુજરાત',
     appTagline: 'ચાલો. સ્પર્ધા કરો. જીતો.',
     
     // Auth

@@ -235,7 +235,12 @@ function renderPage(page) {
 function renderSplash(container) {
   container.innerHTML = `
     <div class="splash-screen">
-      <div class="splash-logo">🏃</div>
+      <div class="splash-logo" style="width: 100px; height: 100px; margin: 0 auto 24px; display: flex; align-items: center; justify-content: center; background: var(--gradient-primary); border-radius: 28px; box-shadow: 0 12px 30px var(--primary-glow);">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width: 50px; height: 50px;">
+          <path d="M3 10h4l2.5-3h4.5l1.5 2h5.5l.5 2v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-6z"/>
+          <path d="M10 14h4M7 17h10"/>
+        </svg>
+      </div>
       <h1 class="splash-title">${t('appName')}</h1>
       <p class="splash-subtitle">${t('appTagline')}</p>
       <div class="splash-loader">
@@ -270,7 +275,12 @@ function renderLogin(container) {
     <div class="auth-container">
       <div class="auth-card">
         <div class="auth-logo">
-          <span class="logo-emoji">🏃</span>
+          <span class="logo-emoji" style="display:inline-flex; align-items:center; justify-content:center; width:52px; height:52px; background:var(--gradient-primary); border-radius:14px; margin-bottom:16px; box-shadow:0 8px 20px var(--primary-glow);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width: 28px; height: 28px;">
+              <path d="M3 10h4l2.5-3h4.5l1.5 2h5.5l.5 2v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-6z"/>
+              <path d="M10 14h4M7 17h10"/>
+            </svg>
+          </span>
           <h1 class="logo-title">${t('appName')}</h1>
           <p class="logo-subtitle">${t('appTagline')}</p>
         </div>
@@ -362,7 +372,12 @@ function renderRegister(container) {
     <div class="auth-container">
       <div class="auth-card">
         <div class="auth-logo">
-          <span class="logo-emoji">🏃</span>
+          <span class="logo-emoji" style="display:inline-flex; align-items:center; justify-content:center; width:52px; height:52px; background:var(--gradient-primary); border-radius:14px; margin-bottom:16px; box-shadow:0 8px 20px var(--primary-glow);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width: 28px; height: 28px;">
+              <path d="M3 10h4l2.5-3h4.5l1.5 2h5.5l.5 2v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-6z"/>
+              <path d="M10 14h4M7 17h10"/>
+            </svg>
+          </span>
           <h1 class="logo-title">${t('register')}</h1>
           <p class="logo-subtitle">${t('appTagline')}</p>
         </div>
@@ -530,29 +545,53 @@ async function renderDashboard(container) {
 
       <div class="stat-grid">
         <div class="stat-card primary">
-          <div class="stat-icon"><span class="flame-animation">🔥</span></div>
+          <div class="stat-icon">
+            <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="color: #FF6B35; width: 26px; height: 26px;">
+              <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/>
+            </svg>
+          </div>
           <div class="stat-value" id="streakValue">${streak?.current_streak || 0}</div>
           <div class="stat-label">${t('currentStreak')}</div>
         </div>
         <div class="stat-card accent">
-          <div class="stat-icon">📊</div>
+          <div class="stat-icon">
+            <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="color: #FFC72C; width: 26px; height: 26px;">
+              <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>
+            </svg>
+          </div>
           <div class="stat-value" id="scoreValue">-</div>
           <div class="stat-label">${t('totalScore')}</div>
         </div>
         <div class="stat-card secondary">
-          <div class="stat-icon">🏅</div>
+          <div class="stat-icon">
+            <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="color: #1DAB9C; width: 26px; height: 26px;">
+              <circle cx="12" cy="8" r="7"/><path d="M8.21 13.89L7 23l5-3 5 3-1.21-9.12"/>
+            </svg>
+          </div>
           <div class="stat-value" id="districtRankValue">-</div>
           <div class="stat-label">${t('districtRank')}</div>
         </div>
         <div class="stat-card" style="--stat-color: var(--info);">
-          <div class="stat-icon">🌟</div>
+          <div class="stat-icon">
+            <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="color: #3B82F6; width: 26px; height: 26px;">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+            </svg>
+          </div>
           <div class="stat-value" id="stateRankValue">-</div>
           <div class="stat-label">${t('stateRank')}</div>
         </div>
       </div>
 
       <div class="card" id="recPreview">
-        <div class="section-title"><span class="title-icon">🤖</span> ${t('recommendations')}</div>
+        <div class="section-title">
+          <span class="title-icon">
+            <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: #A78BFA; width: 18px; height: 18px; vertical-align: middle; margin-right: 6px;">
+              <path d="M12 2v2M5 12H3m18 0h-2M12 20v2M5.6 5.6l1.4 1.4m10 10l1.4 1.4M18.4 5.6l-1.4 1.4m-10 10l-1.4 1.4"/>
+              <circle cx="12" cy="12" r="4"/>
+            </svg>
+          </span>
+          ${t('recommendations')}
+        </div>
         <div id="dashRecList" class="loading-spinner"><div class="spinner"></div></div>
       </div>
 
@@ -1461,7 +1500,14 @@ async function renderProfile(container) {
 
       <!-- Streak Stats -->
       <div class="card">
-        <div class="section-title"><span class="title-icon"><span class="flame-animation">🔥</span></span> ${t('streakStats')}</div>
+        <div class="section-title">
+          <span class="title-icon">
+            <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="color: #FF6B35; width: 18px; height: 18px; vertical-align: middle; margin-right: 6px;">
+              <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/>
+            </svg>
+          </span> 
+          ${t('streakStats')}
+        </div>
         <div class="stat-grid" style="grid-template-columns: repeat(2, 1fr);">
           <div class="stat-card primary">
             <div class="stat-value">${streak?.current_streak || 0}</div>
@@ -1473,8 +1519,10 @@ async function renderProfile(container) {
           </div>
         </div>
         <div style="display:flex; gap:12px; margin-top:12px;">
-          <div class="card-glass" style="flex:1; text-align:center; padding:12px; margin:0;">
-            <div style="font-size:24px;">❄️</div>
+          <div class="card-glass" style="flex:1; text-align:center; padding:12px; margin:0; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+            <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: #60A5FA; width: 24px; height: 24px; margin-bottom: 6px;">
+              <line x1="2" y1="12" x2="22" y2="12"/><line x1="12" y1="2" x2="12" y2="22"/><path d="M20 16l-4-4 4-4"/><path d="M4 8l4 4-4 4"/><path d="M16 4l-4 4-4-4"/><path d="M8 20l4-4 4 4"/>
+            </svg>
             <div style="font-size:13px; color:var(--text-secondary); margin-top:4px;">
               ${streak?.freeze_used_this_month ? t('freezeUsed') : `${streak?.freeze_available || 1} ${t('freezeAvailable')}`}
             </div>
@@ -1484,7 +1532,14 @@ async function renderProfile(container) {
 
       <!-- Badges -->
       <div class="card">
-        <div class="section-title"><span class="title-icon">🎖️</span> ${t('badges')}</div>
+        <div class="section-title">
+          <span class="title-icon">
+            <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: #F7C948; width: 18px; height: 18px; vertical-align: middle; margin-right: 6px;">
+              <circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/>
+            </svg>
+          </span> 
+          ${t('badges')}
+        </div>
         <div class="badge-grid">
           ${badges.map(b => `
             <div class="badge-item ${b.earned ? 'earned' : 'locked'}">
@@ -1498,15 +1553,25 @@ async function renderProfile(container) {
 
       <!-- Referral Program -->
       <div class="card">
-        <div class="section-title"><span class="title-icon">👥</span> ${t('referralProgram')}</div>
+        <div class="section-title">
+          <span class="title-icon">
+            <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: #60A5FA; width: 18px; height: 18px; vertical-align: middle; margin-right: 6px;">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+            </svg>
+          </span> 
+          ${t('referralProgram')}
+        </div>
         <div style="background:var(--bg-glass-light); border:1px solid var(--border-color); border-radius:12px; padding:16px; margin-bottom:16px;">
           <div style="font-size:12px; color:var(--text-secondary); font-weight:600; margin-bottom:4px; text-transform:uppercase;">
             ${currentLang === 'gu' ? 'તમારો રેફરલ કોડ' : 'Your Referral Code'}
           </div>
           <div style="display:flex; justify-content:space-between; align-items:center; background:var(--bg-card); border:1px dashed var(--primary); border-radius:8px; padding:8px 12px; margin-bottom:12px;">
             <span style="font-size:18px; font-weight:800; color:var(--primary); font-family:monospace; letter-spacing:1px;">${user.referral_code || '-'}</span>
-            <button class="sort-pill" onclick="shareReferralLink('${user.referral_code}')" style="margin:0; border-color:var(--primary); color:var(--primary); font-weight:700;">
-              🔗 ${t('shareReferralLink')}
+            <button class="sort-pill" onclick="shareReferralLink('${user.referral_code}')" style="margin:0; border-color:var(--primary); color:var(--primary); font-weight:700; display: inline-flex; align-items: center; gap: 4px;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 12px; height: 12px;">
+                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+              </svg>
+              ${t('shareReferralLink')}
             </button>
           </div>
           <p style="font-size:11px; color:var(--text-secondary); margin:0; line-height:1.4;">

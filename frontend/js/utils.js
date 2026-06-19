@@ -5,7 +5,7 @@
 // ---- i18n System ----
 const i18n = {
   en: {
-    appName: 'Gujarat Step Counter',
+    appName: 'Fit Gujarat',
     appTagline: 'Walk. Compete. Win.',
     login: 'Login', register: 'Register', logout: 'Logout',
     email: 'Email', phone: 'Phone', password: 'Password',
@@ -77,7 +77,7 @@ const i18n = {
     referralProgram: 'Referral Program',
   },
   gu: {
-    appName: 'ગુજરાત સ્ટેપ કાઉન્ટર',
+    appName: 'ફિટ ગુજરાત',
     appTagline: 'ચાલો. સ્પર્ધા કરો. જીતો.',
     login: 'લૉગિન', register: 'નોંધણી', logout: 'લૉગઆઉટ',
     email: 'ઈમેલ', phone: 'ફોન', password: 'પાસવર્ડ',

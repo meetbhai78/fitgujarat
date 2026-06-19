@@ -2862,3 +2862,37 @@ body.light-theme .district-badge {
 .report-badge.harassment       { background: rgba(239,68,68,0.15);  color: var(--danger);  }
 .report-badge.spam             { background: rgba(107,114,128,0.15);color: var(--text-secondary); }
 .report-badge.other            { background: rgba(59,130,246,0.15); color: var(--info);    }
+
+/* ---- Modern Inline SVG Icons Styles ---- */
+.tab-btn .tab-svg {
+  width: 22px;
+  height: 22px;
+  stroke: var(--text-muted);
+  fill: none;
+  stroke-width: 2;
+  transition: transform var(--transition-fast), stroke var(--transition-fast);
+}
+
+.tab-btn:hover .tab-svg {
+  stroke: var(--text-secondary);
+}
+
+.tab-btn.active .tab-svg {
+  transform: translateY(-2px) scale(1.1);
+  stroke: var(--primary);
+}
+
+.svg-icon {
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  fill: none;
+  display: inline-block;
+  vertical-align: middle;
+  transition: transform var(--transition-fast), color var(--transition-fast);
+}
+
+.svg-icon:hover {
+  transform: scale(1.05);
+}
